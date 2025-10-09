@@ -3,7 +3,6 @@ import Login from "./pages/Login";
 import Register from "./components/Register";
 import Dashboard from "./components/Dashboard";
 import PatientDashboard from "./pages/PatientDashboard";
-import ManagerDashboard from "./pages/ManagerDashboard";
 import DoctorDashboard from "./pages/DoctorDashboard";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Navbar from "./components/Navbar";
@@ -17,11 +16,23 @@ import Profile from "./pages/Profile";
 import Appointments from "./pages/Appointments";
 import Settings from "./pages/Settings";
 import MapView from "./pages/MapView";
-function App() {
+import { AuthProvider, useAuth } from "./context/AuthContext";
+import AuthLoading from "./components/AuthLoading";
+import DashboardIndicator from "./components/DashboardIndicator";
+import StorageTest from "./components/StorageTest";
+function AppContent() {
   const [sidebarOpen, setSidebarOpen] = React.useState(false);
+  const { isInitializing } = useAuth();
+
+  // Show loading screen while validating token
+  if (isInitializing) {
+    return <AuthLoading />;
+  }
+
   return (
     <Router>
       <div className="min-h-screen flex flex-col">
+        <DashboardIndicator />
         <Navbar onToggleSidebar={() => setSidebarOpen((v) => !v)} />
         <div className="flex-1 w-full">
           <div className="relative">
@@ -52,16 +63,22 @@ function App() {
                 <Route element={<ProtectedRoute roles={["doctor"]} />}> 
                   <Route path="/doctor-dashboard" element={<DoctorDashboard />} />
                 </Route>
-                <Route element={<ProtectedRoute roles={["admin"]} />}> 
-                  <Route path="/manager-dashboard" element={<ManagerDashboard />} />
-                </Route>
               </Routes>
             </main>
           </div>
         </div>
         <Footer />
+        <StorageTest />
       </div>
     </Router>
+  );
+}
+
+function App() {
+  return (
+    <AuthProvider>
+      <AppContent />
+    </AuthProvider>
   );
 }
 

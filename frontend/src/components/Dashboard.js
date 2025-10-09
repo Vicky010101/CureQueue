@@ -13,7 +13,7 @@ function Dashboard() {
         }
         if (role === "patient") navigate("/patient-dashboard");
         else if (role === "doctor") navigate("/doctor-dashboard");
-        else if (role === "admin") navigate("/manager-dashboard");
+        else if (role === "admin") navigate("/doctor-dashboard");
         else navigate("/login");
     }, [navigate]);
 

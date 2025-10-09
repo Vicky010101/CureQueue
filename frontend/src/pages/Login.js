@@ -1,13 +1,38 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import API from "../api";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { LogIn } from "lucide-react";
+import { useAuth } from "../context/AuthContext";
+import { roleBasedStorage } from "../utils/roleBasedStorage";
 
 function Login() {
     const navigate = useNavigate();
+    const { login, isAuthenticated, user, isInitializing } = useAuth();
     const [form, setForm] = useState({ email: "", password: "" });
     const [msg, setMsg] = useState("");
+    const dashboardType = roleBasedStorage.getDashboardType();
+    const port = window.location.port;
+
+    // Redirect already authenticated users
+    useEffect(() => {
+        if (!isInitializing && isAuthenticated && user) {
+            if (user.role === "patient") {
+                navigate("/patient-dashboard", { replace: true });
+            } else if (user.role === "doctor") {
+                navigate("/doctor-dashboard", { replace: true });
+            } else if (user.role === "admin") {
+                navigate("/doctor-dashboard", { replace: true });
+            } else {
+                navigate("/dashboard", { replace: true });
+            }
+        }
+    }, [isAuthenticated, user, isInitializing, navigate]);
+
+    // Show nothing while initializing (handled at App level)
+    if (isInitializing) {
+        return null;
+    }
 
     const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
@@ -16,9 +41,8 @@ function Login() {
         try {
             const res = await API.post("/auth/login", form);
 
-            // Save token + role
-            localStorage.setItem("token", res.data.token);
-            localStorage.setItem("role", res.data.user.role);
+            // Use AuthContext login method
+            login(res.data.user, res.data.token);
 
             setMsg("Login successful! Redirecting...");
 
@@ -28,7 +52,7 @@ function Login() {
             } else if (res.data.user.role === "doctor") {
                 navigate("/doctor-dashboard");
             } else if (res.data.user.role === "admin") {
-                navigate("/manager-dashboard");
+                navigate("/doctor-dashboard");
             } else {
                 navigate("/dashboard");
             }
@@ -40,8 +64,23 @@ function Login() {
     return (
         <div className="container-responsive" style={{ paddingTop: 40, paddingBottom: 40 }}>
             <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="card" style={{ maxWidth: 520, margin: "0 auto" }}>
-                <h2 className="page-title" style={{ fontSize: 20 }}>Login</h2>
-                <p className="page-subtitle">Welcome back. Enter your credentials to continue.</p>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+                    <h2 className="page-title" style={{ fontSize: 20, margin: 0 }}>Login</h2>
+                    {process.env.NODE_ENV === 'development' && (
+                        <span style={{ 
+                            fontSize: 12, 
+                            background: dashboardType === 'patient' ? '#3b82f6' : dashboardType === 'doctor' ? '#10b981' : '#f59e0b',
+                            color: 'white',
+                            padding: '2px 6px',
+                            borderRadius: '4px',
+                            fontWeight: 'bold',
+                            display: 'none'
+                        }}>
+                            {dashboardType.toUpperCase()} ::{port}
+                        </span>
+                    )}
+                </div>
+                <p className="page-subtitle">Welcome back to the {dashboardType} dashboard. Enter your credentials to continue.</p>
                 <form onSubmit={handleSubmit} style={{ marginTop: 16 }}>
                     <div className="form-field">
                         <label className="label">Email</label>

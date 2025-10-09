@@ -31,7 +31,13 @@
   },
   "scripts": {
     "start": "react-scripts start",
+    "start:patient": "env-cmd -f .env.patient react-scripts start",
+    "start:doctor": "env-cmd -f .env.doctor react-scripts start",
+    "start:manager": "env-cmd -f .env.manager react-scripts start",
     "build": "react-scripts build",
+    "build:patient": "env-cmd -f .env.patient react-scripts build",
+    "build:doctor": "env-cmd -f .env.doctor react-scripts build",
+    "build:manager": "env-cmd -f .env.manager react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
@@ -54,6 +60,7 @@
     ]
   },
   "devDependencies": {
-    "@tailwindcss/postcss": "^4.1.12"
+    "@tailwindcss/postcss": "^4.1.12",
+    "env-cmd": "^11.0.0"
   }
 }

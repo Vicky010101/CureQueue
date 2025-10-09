@@ -1,4 +1,5 @@
 import axios from "axios";
+import { roleBasedStorage } from "./utils/roleBasedStorage";
 
 const API = axios.create({
     baseURL: process.env.REACT_APP_API_URL || "http://localhost:5000/api",
@@ -6,7 +7,7 @@ const API = axios.create({
 
 // Add token to every request if logged in
 API.interceptors.request.use((req) => {
-    const token = localStorage.getItem("token");
+    const token = roleBasedStorage.getToken();
     if (token) {
         req.headers["x-auth-token"] = token;
     }
@@ -24,8 +25,8 @@ API.interceptors.response.use(
         const isCriticalAuthEndpoint = url.includes("/auth/me") || url.includes("/auth/login") || url.includes("/auth/register");
 
         if ((status === 401 || status === 403) && isCriticalAuthEndpoint) {
-            localStorage.removeItem("token");
-            localStorage.removeItem("role");
+            console.log(`[API] Auth error on ${url}, clearing storage and redirecting`);
+            roleBasedStorage.clearAll();
             window.location.href = "/login";
             return; // stop further handling
         }

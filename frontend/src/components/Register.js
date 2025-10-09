@@ -46,7 +46,6 @@ function Register() {
                         <select className="input" name="role" value={form.role} onChange={handleChange}>
                             <option value="patient">Patient</option>
                             <option value="doctor">Doctor</option>
-<option value="admin">Manager</option>
                         </select>
                     </div>
                     <button type="submit" className="btn btn-primary btn-block" style={{ marginTop: 12 }}>

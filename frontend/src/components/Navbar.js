@@ -1,15 +1,14 @@
 import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Menu, Stethoscope, LogOut, LogIn, UserPlus, LayoutDashboard } from "lucide-react";
+import { useAuth } from "../context/AuthContext";
 
 function Navbar({ onToggleSidebar }) {
 	const navigate = useNavigate();
-	const isAuthenticated = typeof window !== "undefined" && !!localStorage.getItem("token");
-	const role = typeof window !== "undefined" ? localStorage.getItem("role") : null;
+	const { isAuthenticated, user, logout } = useAuth();
 
 	const handleLogout = () => {
-		localStorage.removeItem("token");
-		localStorage.removeItem("role");
+		logout();
 		navigate("/login");
 	};
 
@@ -34,7 +33,7 @@ function Navbar({ onToggleSidebar }) {
 					{isAuthenticated ? (
 						<>
 							<Link
-								to={role === "admin" ? "/manager-dashboard" : role === "doctor" ? "/doctor-dashboard" : "/patient-dashboard"}
+								to={user?.role === "admin" ? "/doctor-dashboard" : user?.role === "doctor" ? "/doctor-dashboard" : "/patient-dashboard"}
 								className="btn"
 							>
 								<LayoutDashboard size={16} />

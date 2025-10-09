@@ -1,9 +1,10 @@
 import React from "react";
 import { NavLink } from "react-router-dom";
-import { LayoutDashboard, User, CalendarDays, Settings, Search, BookOpenText, Star, Shield, MapPin, Users } from "lucide-react";
+import { LayoutDashboard, User, CalendarDays, Settings, Search, BookOpenText, Star, MapPin, Users } from "lucide-react";
+import { useAuth } from "../context/AuthContext";
 
 function Sidebar({ isOpen, onClose }) {
-	const role = typeof window !== "undefined" ? localStorage.getItem("role") : null;
+	const { user } = useAuth();
 	return (
 		<aside className={`sidebar ${isOpen ? "open" : ""}`}>
 			<nav>
@@ -15,7 +16,7 @@ function Sidebar({ isOpen, onClose }) {
 					<Search size={16} />
 					Search
 				</NavLink>
-				{role === "patient" && (
+				{user?.role === "patient" && (
 					<NavLink to="/map" className={({ isActive }) => `sidebar-link ${isActive ? "active" : ""}`} onClick={onClose}>
 						<MapPin size={16} />
 						Find Doctors
@@ -41,14 +42,6 @@ function Sidebar({ isOpen, onClose }) {
 					<Settings size={16} />
 					Settings
 				</NavLink>
-				{role === "admin" && (
-					<>
-						<NavLink to="/manager-dashboard" className={({ isActive }) => `sidebar-link ${isActive ? "active" : ""}`} onClick={onClose}>
-							<Shield size={16} />
-							Manager Dashboard
-						</NavLink>
-					</>
-				)}
 			</nav>
 		</aside>
 	);

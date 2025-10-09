@@ -332,13 +332,27 @@ router.patch("/:id/complete", auth, async (req, res) => {
   }
 });
 
-// Admin: Assign waiting time to appointment
-router.post("/:id/waiting-time", auth, roleCheck("admin"), async (req, res) => {
+// Admin/Doctor: Assign waiting time to appointment
+router.post("/:id/waiting-time", auth, async (req, res) => {
   try {
     const { waitingTime } = req.body;
 
     if (waitingTime < 0) {
       return res.status(400).json({ msg: "Waiting time cannot be negative" });
+    }
+
+    // Find the appointment first
+    let appointment = await Appointment.findById(req.params.id);
+    if (!appointment) {
+      return res.status(404).json({ msg: "Appointment not found" });
+    }
+
+    // Check permissions: Admin can update any, Doctor can update their own appointments
+    const isAdmin = req.user.role === 'admin';
+    const isDoctor = req.user.role === 'doctor' && appointment.doctorId.toString() === req.user.id;
+    
+    if (!isAdmin && !isDoctor) {
+      return res.status(403).json({ msg: "You don't have permission to update this appointment's waiting time" });
     }
 
     // Update the specific appointment waiting time
@@ -347,10 +361,6 @@ router.post("/:id/waiting-time", auth, roleCheck("admin"), async (req, res) => {
       { waitingTime: parseInt(waitingTime) || 0 },
       { new: true }
     );
-
-    if (!updated) {
-      return res.status(404).json({ msg: "Appointment not found" });
-    }
 
     // Populate to get patient and doctor info for email
     await updated.populate('patientId', 'name email');

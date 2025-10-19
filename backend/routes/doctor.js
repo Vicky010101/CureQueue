@@ -11,17 +11,21 @@ router.get("/appointments", auth, roleCheck("doctor", "admin"), async (req, res)
     try {
         const appts = await Appointment.find({ doctorId: req.user.id })
             .populate('patientId', 'name')
+            .populate('doctorId', 'name')
             .sort({ date: 1, time: 1 });
 
         const appointmentsForDoctor = appts.map(apt => ({
             _id: apt._id,
-            patientName: apt.patientId?.name || 'Unknown Patient',
+            patientName: apt.isOffline ? apt.patientName : (apt.patientId?.name || 'Unknown Patient'),
+            doctorName: apt.doctorId?.name ? 'Dr. ' + apt.doctorId.name : 'Doctor',
             date: apt.date,
             time: apt.time,
             status: apt.status,
             waitingTime: apt.waitingTime || 0,
             reason: apt.reason,
-            token: apt.token
+            token: apt.token,
+            isOffline: apt.isOffline || false,
+            phone: apt.phone || ''
         }));
 
         res.json({ appointments: appointmentsForDoctor });

@@ -18,12 +18,22 @@ function DoctorDashboard() {
 	const [filter, setFilter] = useState('all');
 	const [searchQuery, setSearchQuery] = useState('');
 	const [appointments, setAppointments] = useState([]);
+	// Offline Patient Form state
+	const [showAddForm, setShowAddForm] = useState(false);
+	const [offlinePatientForm, setOfflinePatientForm] = useState({
+		patientName: '',
+		phone: '',
+		age: '',
+		gender: ''
+	});
 
 	// Load all doctor's appointments function
 	const loadAllAppointments = async () => {
 		try {
 			const res = await API.get('/doctor/appointments');
 			const appointmentData = res.data.appointments || [];
+			console.log('Raw appointment data from backend:', appointmentData);
+			
 			// Transform to enhanced appointment format
 			const transformedAppointments = appointmentData.map(a => ({
 				_id: a._id,
@@ -34,8 +44,10 @@ function DoctorDashboard() {
 				status: a.status,
 				reason: a.reason,
 				token: a.token,
-				waitingTime: a.waitingTime || 0
+				waitingTime: a.waitingTime || 0,
+				isOffline: a.isOffline || false
 			}));
+			console.log('Transformed appointments:', transformedAppointments);
 			setAppointments(transformedAppointments);
 			
 			// Also maintain existing format for compatibility
@@ -80,15 +92,50 @@ function DoctorDashboard() {
 
 	useEffect(() => {
 		const handleNewAppointment = (appointment) => {
+			console.log('Event: handleNewAppointment received:', appointment);
+			
+			// Check if appointment already exists to prevent duplicates
+			const existsInEnhanced = appointments.find(a => a._id === appointment._id);
+			if (existsInEnhanced) {
+				console.log('Event: Appointment already exists in enhanced state, skipping');
+				return;
+			}
+			
 			const todayLocal = new Date();
 			const yyyy = todayLocal.getFullYear();
 			const mm = String(todayLocal.getMonth() + 1).padStart(2, '0');
 			const dd = String(todayLocal.getDate()).padStart(2, '0');
 			const todayStr = `${yyyy}-${mm}-${dd}`;
+			
 			if (appointment.date === todayStr) {
-				const newAppt = { id: appointment._id, patient: appointment.patientName, time: appointment.time, date: appointment.date, status: appointment.status, reason: appointment.reason, token: appointment.token, waitingTime: appointment.waitingTime };
-				setTodayAppointments(prev => [...prev, newAppt]);
-				setAllAppointments(prev => [...prev, newAppt]);
+				const newAppt = { 
+					id: appointment._id, 
+					patient: appointment.patientName, 
+					time: appointment.time, 
+					date: appointment.date, 
+					status: appointment.status, 
+					reason: appointment.reason, 
+					token: appointment.token, 
+					waitingTime: appointment.waitingTime 
+				};
+				
+				// Check for duplicates in legacy states too
+				setTodayAppointments(prev => {
+					if (prev.find(a => a.id === appointment._id)) {
+						console.log('Event: Duplicate in today appointments, skipping');
+						return prev;
+					}
+					return [...prev, newAppt];
+				});
+				
+				setAllAppointments(prev => {
+					if (prev.find(a => a.id === appointment._id)) {
+						console.log('Event: Duplicate in all appointments, skipping');
+						return prev;
+					}
+					return [...prev, newAppt];
+				});
+				
 				// Update enhanced appointments state
 				const enhancedAppt = {
 					_id: appointment._id,
@@ -101,7 +148,16 @@ function DoctorDashboard() {
 					token: appointment.token,
 					waitingTime: appointment.waitingTime || 0
 				};
-				setAppointments(prev => [...prev, enhancedAppt]);
+				
+				setAppointments(prev => {
+					if (prev.find(a => a._id === appointment._id)) {
+						console.log('Event: Duplicate in enhanced appointments, skipping');
+						return prev;
+					}
+					return [...prev, enhancedAppt];
+				});
+				
+				console.log('Event: Added new appointment from event:', appointment._id);
 			}
 		};
 
@@ -164,17 +220,57 @@ function DoctorDashboard() {
 	};
 
 	const cancelAppointment = async (id) => {
-		if (!window.confirm('Cancel this appointment?')) return;
+		// Find the appointment in our current state for validation
+		const appointment = appointments.find(a => a._id === id);
+		if (!appointment) {
+			toast.error('Appointment not found in current data');
+			return;
+		}
+
+		// Check if appointment can be cancelled
+		if (appointment.status === 'cancelled') {
+			toast.error('Appointment is already cancelled');
+			return;
+		}
+
+		if (appointment.status === 'completed') {
+			toast.error('Cannot cancel a completed appointment');
+			return;
+		}
+
+		if (!window.confirm(`Cancel appointment for ${appointment.patientName}?`)) return;
+
 		try {
-			await API.patch(`/appointments/${id}/cancel`);
+			console.log('Attempting to cancel appointment:', {
+				id,
+				patient: appointment.patientName,
+				status: appointment.status,
+				date: appointment.date,
+				time: appointment.time,
+				doctorUser: me ? { id: me.id, name: me.name, role: me.role } : 'not loaded'
+			});
+			console.log('API call URL:', `/appointments/${id}/cancel`);
+			
+			const response = await API.patch(`/appointments/${id}/cancel`);
+			console.log('Cancel response:', response.data);
+			
+			// Update appointments state
 			setAppointments(prev => prev.map(a => a._id === id ? { ...a, status: 'cancelled' } : a));
 			// Update legacy state for compatibility
 			updateAppointmentStatus(id, 'cancelled');
-			toast.success('Appointment cancelled');
+			toast.success(`Appointment for ${appointment.patientName} cancelled successfully`);
 			queueBus.emit('appointmentUpdated', { _id: id, status: 'cancelled' });
 		} catch (e) {
-			console.error('Cancel error:', e);
-			toast.error('Failed to cancel');
+			console.error('Cancel error details:', {
+				message: e.message,
+				response: e.response?.data,
+				status: e.response?.status,
+				statusText: e.response?.statusText,
+				url: e.config?.url,
+				headers: e.config?.headers
+			});
+			const errorMessage = e.response?.data?.msg || `Failed to cancel appointment: ${e.message}`;
+			toast.error(errorMessage);
 		}
 	};
 
@@ -217,9 +313,151 @@ function DoctorDashboard() {
 		}
 	};
 
-	// Add Patient placeholder function
-	const handleAddPatient = () => {
-		toast.info('Add Patient functionality coming soon!');
+	// Offline Patient functions
+	const toggleAddForm = () => {
+		setShowAddForm(!showAddForm);
+		if (showAddForm) {
+			// Reset form when closing
+			setOfflinePatientForm({
+				patientName: '',
+				phone: '',
+				age: '',
+				gender: ''
+			});
+		}
+	};
+
+	const handleFormChange = (e) => {
+		const { name, value } = e.target;
+		setOfflinePatientForm(prev => ({ ...prev, [name]: value }));
+	};
+
+	const calculateNextToken = () => {
+		const todayAppts = appointments.filter(a => a.date === todayStr && a.status === 'confirmed');
+		if (todayAppts.length === 0) return 1;
+		const maxToken = Math.max(...todayAppts.map(a => a.token || 0));
+		return maxToken + 1;
+	};
+
+	const calculateWaitingTime = () => {
+		const todayAppts = appointments.filter(a => a.date === todayStr && a.status === 'confirmed');
+		return todayAppts.length * 5; // 5 minutes per existing patient
+	};
+
+	const submitOfflinePatient = async () => {
+		if (!offlinePatientForm.patientName.trim()) {
+			toast.error('Patient name is required');
+			return;
+		}
+
+		try {
+			console.log('Submitting offline patient:', offlinePatientForm);
+			
+			// Create appointment data for offline patient
+			const appointmentData = {
+				doctorId: me.id,
+				date: todayStr,
+				reason: `Offline patient${offlinePatientForm.age ? ` - Age: ${offlinePatientForm.age}` : ''}${offlinePatientForm.gender ? `, Gender: ${offlinePatientForm.gender}` : ''}`,
+				patientName: offlinePatientForm.patientName.trim(),
+				phone: offlinePatientForm.phone || '',
+				isOffline: true
+			};
+
+			console.log('Sending appointment data:', appointmentData);
+
+			// Call the appointment creation API
+			const response = await API.post('/appointments/offline', appointmentData);
+			const newAppointment = response.data.appointment;
+			
+			console.log('Received new appointment from backend:', newAppointment);
+
+			// Check if appointment already exists to prevent duplicates
+			const existingAppt = appointments.find(a => a._id === newAppointment._id);
+			if (existingAppt) {
+				console.log('Appointment already exists, skipping duplicate add');
+				return;
+			}
+
+			// Create enhanced appointment object using backend response data
+			const enhancedAppt = {
+				_id: newAppointment._id,
+				// Use patientName from backend response, fallback to form data
+				patientName: newAppointment.patientName || offlinePatientForm.patientName.trim(),
+				doctorName: newAppointment.doctorName || `Dr. ${me.name}`,
+				date: newAppointment.date,
+				time: newAppointment.time,
+				status: newAppointment.status,
+				reason: newAppointment.reason,
+				token: newAppointment.token,
+				waitingTime: newAppointment.waitingTime || 0,
+				isOffline: true,
+				phone: newAppointment.phone || offlinePatientForm.phone || ''
+			};
+
+			// Create legacy appointment object for backward compatibility
+			const legacyAppt = {
+				id: newAppointment._id,
+				patient: newAppointment.patientName || offlinePatientForm.patientName.trim(),
+				time: newAppointment.time,
+				date: newAppointment.date,
+				status: newAppointment.status,
+				reason: newAppointment.reason,
+				token: newAppointment.token,
+				waitingTime: newAppointment.waitingTime || 0,
+				isOffline: true
+			};
+
+			console.log('Adding appointment to state:', { enhancedAppt, legacyAppt });
+
+			// Update state arrays with new appointment (DO NOT emit event to prevent duplicates)
+			setAppointments(prev => {
+				// Double-check for duplicates before adding
+				if (prev.find(a => a._id === newAppointment._id)) {
+					console.log('Duplicate detected in enhanced appointments, skipping');
+					return prev;
+				}
+				return [...prev, enhancedAppt];
+			});
+			
+			setAllAppointments(prev => {
+				if (prev.find(a => a.id === newAppointment._id)) {
+					console.log('Duplicate detected in all appointments, skipping');
+					return prev;
+				}
+				return [...prev, legacyAppt];
+			});
+			
+			// Only add to today's appointments if it's for today
+			if (newAppointment.date === todayStr) {
+				setTodayAppointments(prev => {
+					if (prev.find(a => a.id === newAppointment._id)) {
+						console.log('Duplicate detected in today appointments, skipping');
+						return prev;
+					}
+					return [...prev, legacyAppt];
+				});
+			}
+
+			// Store patient name for success message before form reset
+			const patientName = offlinePatientForm.patientName.trim();
+
+			// Reset form and hide it
+			setOfflinePatientForm({
+				patientName: '',
+				phone: '',
+				age: '',
+				gender: ''
+			});
+			setShowAddForm(false);
+			
+			toast.success(`Patient ${patientName} added successfully! Token: ${newAppointment.token}`);
+			console.log('Offline patient added successfully:', newAppointment._id);
+
+		} catch (error) {
+			console.error('Add offline patient error:', error);
+			const errorMsg = error.response?.data?.msg || 'Failed to add offline patient';
+			toast.error(errorMsg);
+		}
 	};
 
 	// Legacy functions for compatibility
@@ -321,11 +559,113 @@ function DoctorDashboard() {
 						<h2 className="card-title">Appointments Management</h2>
 						<CalendarDays size={20} color="#0f766e" />
 					</div>
-					<button className="btn btn-primary" onClick={handleAddPatient} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+					<button className="btn btn-primary" onClick={toggleAddForm} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
 						<UserPlus size={16} />
-						Add Patient
+						{showAddForm ? 'Cancel' : 'Add Patient'}
 					</button>
 				</div>
+
+				{/* Inline Add Patient Form */}
+				{showAddForm && (
+					<motion.div
+						initial={{ opacity: 0, height: 0 }}
+						animate={{ opacity: 1, height: 'auto' }}
+						exit={{ opacity: 0, height: 0 }}
+						style={{
+							padding: '16px',
+							margin: '8px 0',
+							background: '#f8fafc',
+							border: '1px solid #e2e8f0',
+							borderRadius: '8px'
+						}}
+					>
+						<h4 style={{ margin: '0 0 12px 0', fontSize: '16px', fontWeight: '600', color: '#1e293b' }}>
+							Add Offline Patient
+						</h4>
+						<p style={{ margin: '0 0 16px 0', fontSize: '13px', color: '#64748b' }}>
+							This patient is being added offline for in-clinic queue management only.
+						</p>
+
+						<div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '12px' }}>
+							<div className="form-field">
+								<label className="label" style={{ fontSize: '14px' }}>Patient Name *</label>
+								<input
+									className="input"
+									name="patientName"
+									value={offlinePatientForm.patientName}
+									onChange={handleFormChange}
+									placeholder="Enter patient name"
+									style={{ fontSize: '14px' }}
+									required
+								/>
+							</div>
+							<div className="form-field">
+								<label className="label" style={{ fontSize: '14px' }}>Phone Number</label>
+								<input
+									className="input"
+									name="phone"
+									value={offlinePatientForm.phone}
+									onChange={handleFormChange}
+									placeholder="Enter phone number"
+									style={{ fontSize: '14px' }}
+								/>
+							</div>
+						</div>
+
+						<div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '16px' }}>
+							<div className="form-field">
+								<label className="label" style={{ fontSize: '14px' }}>Age</label>
+								<input
+									className="input"
+									name="age"
+									type="number"
+									value={offlinePatientForm.age}
+									onChange={handleFormChange}
+									placeholder="Age"
+									style={{ fontSize: '14px' }}
+								/>
+							</div>
+							<div className="form-field">
+								<label className="label" style={{ fontSize: '14px' }}>Gender</label>
+								<select
+									className="input"
+									name="gender"
+									value={offlinePatientForm.gender}
+									onChange={handleFormChange}
+									style={{ fontSize: '14px' }}
+								>
+									<option value="">Select Gender</option>
+									<option value="Male">Male</option>
+									<option value="Female">Female</option>
+									<option value="Other">Other</option>
+								</select>
+							</div>
+						</div>
+
+						<div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+							<div style={{ fontSize: '13px', color: '#64748b' }}>
+								<strong>Next Token:</strong> #{calculateNextToken()} | <strong>Estimated Wait:</strong> {calculateWaitingTime()} minutes
+							</div>
+							<div style={{ display: 'flex', gap: '8px' }}>
+								<button
+									className="btn btn-outline btn-sm"
+									onClick={toggleAddForm}
+									style={{ fontSize: '14px', padding: '6px 12px' }}
+								>
+									Cancel
+								</button>
+								<button
+									className="btn btn-primary btn-sm"
+									onClick={submitOfflinePatient}
+									style={{ fontSize: '14px', padding: '6px 12px', display: 'flex', alignItems: 'center', gap: '4px' }}
+								>
+									<UserPlus size={14} />
+									Add Patient
+								</button>
+							</div>
+						</div>
+					</motion.div>
+				)}
 
 				{/* Enhanced Toolbar: search + filters */}
 				<div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center', margin: '8px 0 12px 0' }}>

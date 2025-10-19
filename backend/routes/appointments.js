@@ -103,6 +103,93 @@ router.post("/", auth, async (req, res) => {
   }
 });
 
+// Create offline patient appointment (doctors only)
+router.post("/offline", auth, roleCheck("doctor", "admin"), async (req, res) => {
+  try {
+    const { doctorId, date, reason, patientName, phone } = req.body;
+
+    // Validate required fields
+    if (!patientName || !patientName.trim()) {
+      return res.status(400).json({ msg: "Patient name is required" });
+    }
+
+    // Use the authenticated user's ID as doctorId if not provided or validate if provided
+    const finalDoctorId = doctorId || req.user.id;
+    
+    // If doctorId is provided, ensure the user has permission
+    if (doctorId && doctorId !== req.user.id && req.user.role !== 'admin') {
+      return res.status(403).json({ msg: "You can only create offline patients for yourself" });
+    }
+
+    // Check if doctor exists
+    const doctor = await User.findById(finalDoctorId);
+    if (!doctor || doctor.role !== 'doctor') {
+      return res.status(400).json({ msg: "Invalid doctor" });
+    }
+
+    // Use today's date if not provided
+    const finalDate = date || new Date().toISOString().split('T')[0];
+
+    // Validate date format (YYYY-MM-DD)
+    const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+    if (!dateRegex.test(finalDate)) {
+      return res.status(400).json({ msg: "Invalid date format. Use YYYY-MM-DD" });
+    }
+
+    // Generate token number for the day
+    const latest = await Appointment.find({ date: finalDate, doctorId: finalDoctorId }).sort({ token: -1 }).limit(1);
+    const nextToken = latest.length ? (latest[0].token || 0) + 1 : 1;
+
+    // Compute current time in IST for booking time
+    const nowUtc = new Date();
+    const fmt = new Intl.DateTimeFormat('en-GB', {
+      timeZone: 'Asia/Kolkata',
+      hour12: false,
+      year: 'numeric', month: '2-digit', day: '2-digit',
+      hour: '2-digit', minute: '2-digit'
+    });
+    const parts = Object.fromEntries(fmt.formatToParts(nowUtc).map(p => [p.type, p.value]));
+    const istTime = `${parts.hour}:${parts.minute}`; // HH:mm
+
+    // Calculate waiting time: number of appointments already booked with this doctor for today
+    const todayCount = await Appointment.countDocuments({
+      doctorId: finalDoctorId,
+      date: finalDate,
+      status: { $in: ['confirmed', 'pending'] }
+    });
+    const waitingTime = todayCount * 5; // minutes
+
+    // Create offline appointment
+    const appointment = await Appointment.create({
+      doctorId: finalDoctorId,
+      date: finalDate,
+      time: istTime,
+      reason: reason || `Offline patient`,
+      token: nextToken,
+      status: "confirmed",
+      waitingTime,
+      isOffline: true,
+      patientName: patientName.trim(),
+      phone: phone || ''
+    });
+
+    // Populate doctor name for response
+    await appointment.populate('doctorId', 'name');
+
+    res.status(201).json({
+      appointment: {
+        ...appointment.toObject(),
+        doctorName: appointment.doctorId.name
+      },
+      appointmentTimeIST: istTime,
+      waitingTime
+    });
+  } catch (e) {
+    console.error('Offline appointment creation error:', e);
+    res.status(500).json({ msg: "Server error" });
+  }
+});
+
 // My appointments
 router.get("/me", auth, async (req, res) => {
   try {
@@ -139,14 +226,16 @@ router.get("/admin", auth, roleCheck("admin"), async (req, res) => {
 
     const appointmentsWithNames = appts.map(apt => ({
       _id: apt._id,
-      patientName: apt.patientId?.name || 'Unknown Patient',
+      patientName: apt.isOffline ? apt.patientName : (apt.patientId?.name || 'Unknown Patient'),
       doctorName: apt.doctorId?.name || 'Unknown Doctor',
       date: apt.date,
       time: apt.time,
       status: apt.status,
       waitingTime: apt.waitingTime || 0,
       reason: apt.reason,
-      token: apt.token
+      token: apt.token,
+      isOffline: apt.isOffline || false,
+      phone: apt.phone || ''
     }));
 
     res.json({ appointments: appointmentsWithNames });
@@ -165,13 +254,16 @@ router.get("/doctor/me", auth, roleCheck("doctor", "admin"), async (req, res) =>
 
     const appointmentsForDoctor = appts.map(apt => ({
       _id: apt._id,
-      patientName: apt.patientId?.name || 'Unknown Patient',
+      patientName: apt.isOffline ? apt.patientName : (apt.patientId?.name || 'Unknown Patient'),
+      doctorName: 'Dr. ' + req.user.name,
       date: apt.date,
       time: apt.time,
       status: apt.status,
       waitingTime: apt.waitingTime || 0,
       reason: apt.reason,
-      token: apt.token
+      token: apt.token,
+      isOffline: apt.isOffline || false,
+      phone: apt.phone || ''
     }));
 
     res.json({ appointments: appointmentsForDoctor });
@@ -209,15 +301,26 @@ router.patch("/:id/cancel", auth, async (req, res) => {
     });
 
     // Check if user has permission to cancel this appointment
-    const isPatient = appointment.patientId.toString() === req.user.id;
+    // For offline patients, patientId is null, so only doctor or admin can cancel
+    const isPatient = appointment.patientId && appointment.patientId.toString() === req.user.id;
     const isDoctor = appointment.doctorId.toString() === req.user.id;
     const isAdmin = req.user.role === 'admin';
+    const isOfflinePatient = appointment.isOffline;
 
-    console.log(`[CANCEL] Permission check: isPatient=${isPatient}, isDoctor=${isDoctor}, isAdmin=${isAdmin}`);
+    console.log(`[CANCEL] Permission check: isPatient=${isPatient}, isDoctor=${isDoctor}, isAdmin=${isAdmin}, isOffline=${isOfflinePatient}`);
 
-    if (!isPatient && !isDoctor && !isAdmin) {
-      console.log(`[CANCEL] Permission denied for user ${req.user.id}`);
-      return res.status(403).json({ msg: "You don't have permission to cancel this appointment" });
+    // For offline patients, only doctor or admin can cancel
+    if (isOfflinePatient) {
+      if (!isDoctor && !isAdmin) {
+        console.log(`[CANCEL] Permission denied for offline patient - user ${req.user.id}`);
+        return res.status(403).json({ msg: "You don't have permission to cancel this offline patient appointment" });
+      }
+    } else {
+      // For regular patients, patient, doctor, or admin can cancel
+      if (!isPatient && !isDoctor && !isAdmin) {
+        console.log(`[CANCEL] Permission denied for user ${req.user.id}`);
+        return res.status(403).json({ msg: "You don't have permission to cancel this appointment" });
+      }
     }
 
     // Check if appointment can be cancelled (not completed or already cancelled)
@@ -232,19 +335,21 @@ router.patch("/:id/cancel", auth, async (req, res) => {
     await appointment.save();
     console.log(`[CANCEL] Appointment saved successfully`);
 
-    // Populate patient and doctor info
-    await appointment.populate('patientId', 'name email');
+    // Populate doctor info and patient info if not offline
     await appointment.populate('doctorId', 'name');
-    console.log(`[CANCEL] Appointment populated with patient and doctor info`);
+    if (!appointment.isOffline && appointment.patientId) {
+      await appointment.populate('patientId', 'name email');
+    }
+    console.log(`[CANCEL] Appointment populated with doctor info`);
 
-    // Send cancellation email to patient
-    const patient = appointment.patientId;
+    // Send cancellation email to patient (only for regular appointments with email)
+    const patient = appointment.isOffline ? null : appointment.patientId;
     const doctor = appointment.doctorId;
-    const patientName = patient?.name || 'Patient';
+    const patientName = appointment.isOffline ? appointment.patientName : (patient?.name || 'Patient');
     const doctorName = doctor?.name || 'Doctor';
     const date = appointment.date;
     const time = appointment.time;
-    const to = patient?.email;
+    const to = patient?.email; // Will be null for offline patients
 
     // Use mailer utility
     const { sendAppointmentCancellationByDoctor, sendAppointmentCancellationByPatient } = require('../utils/mailer');
@@ -315,14 +420,16 @@ router.patch("/:id/complete", auth, async (req, res) => {
     appointment.status = 'completed';
     await appointment.save();
 
-    // Populate names for response
-    await appointment.populate('patientId', 'name');
+    // Populate doctor info and patient info if not offline
     await appointment.populate('doctorId', 'name');
+    if (!appointment.isOffline && appointment.patientId) {
+      await appointment.populate('patientId', 'name');
+    }
 
     res.json({
       appointment: {
         ...appointment.toObject(),
-        patientName: appointment.patientId?.name || 'Unknown Patient',
+        patientName: appointment.isOffline ? appointment.patientName : (appointment.patientId?.name || 'Unknown Patient'),
         doctorName: appointment.doctorId?.name || 'Unknown Doctor'
       }
     });

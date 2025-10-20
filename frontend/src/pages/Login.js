@@ -38,8 +38,16 @@ function Login() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setMsg(""); // Clear previous messages
+        
         try {
-            const res = await API.post("/auth/login", form);
+            console.log('Attempting login:', { email: form.email, password: '[HIDDEN]' });
+            const res = await API.post("/auth/login", {
+                email: form.email.trim(),
+                password: form.password
+            });
+            
+            console.log('Login response:', { user: res.data.user, hasToken: !!res.data.token });
 
             // Use AuthContext login method
             login(res.data.user, res.data.token);
@@ -57,7 +65,14 @@ function Login() {
                 navigate("/dashboard");
             }
         } catch (err) {
-            setMsg(err.response?.data?.msg || "Error occurred");
+            console.error('Login error:', err);
+            const errorMsg = err.response?.data?.msg || "Error occurred during login";
+            setMsg(errorMsg);
+            
+            // Show debug info in development
+            if (process.env.NODE_ENV === 'development' && err.response?.data?.debug) {
+                console.log('Debug info:', err.response.data.debug);
+            }
         }
     };
 

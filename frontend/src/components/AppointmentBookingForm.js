@@ -3,6 +3,7 @@ import { CalendarDays, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 import API from "../api";
 import { queueBus } from "../lib/eventBus";
+import '../pages/PatientDashboard.css';
 
 function useDoctors() {
   const [doctors, setDoctors] = useState([]);
@@ -74,30 +75,29 @@ function AppointmentBookingForm() {
 	if (bookingSuccess) {
 		return (
 			<section className="appointment-section">
-				<div className="card appointment-card">
-					<div className="card-header">
-						<h3 className="card-title">Booking Confirmed!</h3>
+				<div className="card appointment-card patient-card">
+					<div className="card-header patient-card-header">
+						<h3 className="card-title patient-card-title">Booking Confirmed!</h3>
 						<CheckCircle2 size={20} color="#10b981" />
 					</div>
-					<div style={{ padding: 16, background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 8 }}>
-						<div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+					<div className="patient-booking-success patient-card-body">
+						<div className="patient-booking-success-header">
 							<CheckCircle2 size={16} color="#10b981" />
-							<span style={{ fontWeight: 600, color: '#059669' }}>Appointment Booked Successfully</span>
+							<span className="patient-booking-success-title">Appointment Booked Successfully</span>
 						</div>
-						<div style={{ display: 'grid', gap: 8 }}>
-							<p><strong>Token:</strong> {bookingSuccess.token}</p>
-							<p><strong>Doctor:</strong> {bookingSuccess.doctor}</p>
-							<p><strong>Date:</strong> {bookingSuccess.date}</p>
-							<p><strong>Booked At (IST):</strong> {bookingSuccess.bookedAtIST}</p>
+						<div className="patient-booking-details">
+							<div className="patient-booking-detail"><strong>Token:</strong> <span>{bookingSuccess.token}</span></div>
+							<div className="patient-booking-detail"><strong>Doctor:</strong> <span>{bookingSuccess.doctor}</span></div>
+							<div className="patient-booking-detail"><strong>Date:</strong> <span>{bookingSuccess.date}</span></div>
+							<div className="patient-booking-detail"><strong>Booked At (IST):</strong> <span>{bookingSuccess.bookedAtIST}</span></div>
 							{typeof bookingSuccess.waitingTime === 'number' && (
-								<p><strong>Estimated Waiting Time:</strong> {bookingSuccess.waitingTime} minutes</p>
+								<div className="patient-booking-detail"><strong>Estimated Waiting Time:</strong> <span>{bookingSuccess.waitingTime} minutes</span></div>
 							)}
-							<p><strong>Status:</strong> {bookingSuccess.status}</p>
+							<div className="patient-booking-detail"><strong>Status:</strong> <span>{bookingSuccess.status}</span></div>
 						</div>
 						<button 
-							className="btn btn-primary" 
+							className="btn btn-primary patient-btn" 
 							onClick={resetForm}
-							style={{ marginTop: 12 }}
 						>
 							Book Another Appointment
 						</button>
@@ -109,72 +109,74 @@ function AppointmentBookingForm() {
 
 	return (
 		<section className="appointment-section">
-			<div className="card appointment-card">
-				<div className="card-header">
-					<h3 className="card-title">Book Appointment</h3>
+			<div className="card appointment-card patient-card">
+				<div className="card-header patient-card-header">
+					<h3 className="card-title patient-card-title">Book Appointment</h3>
 					<CalendarDays size={20} color="#0f766e" />
 				</div>
-				<form onSubmit={submit} className="form-modern form-compact appointment-form">
-				<div className="grid grid-2">
-					<div className="form-field">
-						<label className="label">Date *</label>
-						<input 
-							className="input" 
-							type="date" 
-							value={date} 
-							onChange={(e) => setDate(e.target.value)}
-							min={new Date().toISOString().split('T')[0]}
-							required
-						/>
-					</div>
-					<div className="form-field">
-						<label className="label">Doctor *</label>
-						<select 
-							className="input" 
-							value={doctorId} 
-							onChange={(e) => setDoctorId(e.target.value)}
-							required
+				<div className="patient-card-body">
+					<form onSubmit={submit} className="form-modern form-compact appointment-form">
+						<div className="grid grid-2">
+							<div className="form-field">
+								<label className="label">Date *</label>
+								<input 
+									className="input" 
+									type="date" 
+									value={date} 
+									onChange={(e) => setDate(e.target.value)}
+									min={new Date().toISOString().split('T')[0]}
+									required
+								/>
+							</div>
+							<div className="form-field">
+								<label className="label">Doctor *</label>
+								<select 
+									className="input" 
+									value={doctorId} 
+									onChange={(e) => setDoctorId(e.target.value)}
+									required
+								>
+									<option value="">Select doctor</option>
+									{doctors.map((d) => (
+										<option key={d.id} value={d.id}>{d.name}</option>
+									))}
+								</select>
+							</div>
+						</div>
+						<div className="form-field">
+							<label className="label">Reason for Visit</label>
+							<textarea 
+								className="input" 
+								rows={3} 
+								placeholder="Brief reason for visit" 
+								value={reason} 
+								onChange={(e) => setReason(e.target.value)} 
+							/>
+						</div>
+						<button 
+							className="btn btn-primary patient-btn" 
+							type="submit" 
+							disabled={!date || !doctorId || loading}
 						>
-							<option value="">Select doctor</option>
-							{doctors.map((d) => (
-								<option key={d.id} value={d.id}>{d.name}</option>
-							))}
-						</select>
-					</div>
+							{loading ? (
+								<>
+									<div className="spinner" style={{ width: 16, height: 16, borderWidth: 2 }}></div>
+									Booking...
+								</>
+							) : (
+								<>
+									<CheckCircle2 size={16} />
+									Confirm Booking
+								</>
+							)}
+						</button>
+						{selectedDoctor && (
+							<p className="text-muted" style={{ marginTop: '12px', fontSize: '0.875rem' }}>
+								Selected: {selectedDoctor.name} — {selectedDoctor.specialty}
+							</p>
+						)}
+					</form>
 				</div>
-				<div className="form-field">
-					<label className="label">Reason for Visit</label>
-					<textarea 
-						className="input" 
-						rows={3} 
-						placeholder="Brief reason for visit" 
-						value={reason} 
-						onChange={(e) => setReason(e.target.value)} 
-					/>
-				</div>
-				<button 
-					className="btn btn-primary" 
-					type="submit" 
-					disabled={!date || !doctorId || loading}
-				>
-					{loading ? (
-						<>
-							<div className="spinner" style={{ width: 16, height: 16, borderWidth: 2 }}></div>
-							Booking...
-						</>
-					) : (
-						<>
-							<CheckCircle2 size={16} />
-							Confirm Booking
-						</>
-					)}
-				</button>
-				{selectedDoctor && (
-					<p className="text-muted">
-						Selected: {selectedDoctor.name} — {selectedDoctor.specialty}
-					</p>
-				)}
-			</form>
 			</div>
 		</section>
 	);

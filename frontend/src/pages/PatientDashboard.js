@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import API from "../api";
 import { motion } from "framer-motion";
+import './PatientDashboard.css';
 import { CalendarDays, ListChecks, PlusCircle, Search, User, MapPin, Stethoscope, CheckCircle, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 import QueueStatusCard from "../components/QueueStatusCard";
@@ -156,30 +157,29 @@ function PatientDashboard() {
 			);
 		}
 
-		return appointments.map((a) => (
-			<li key={a.id} className="list-item">
-				<div style={{ flex: 1 }}>
-					<p style={{ fontWeight: 600 }}>{a.doctor}</p>
-					<p className="text-muted" style={{ fontSize: 14 }}>{a.date} • {a.time}</p>
+	return appointments.map((a) => (
+			<li key={a.id} className="list-item patient-appointment-item">
+				<div className="patient-appointment-info">
+					<p className="patient-appointment-doctor">{a.doctor}</p>
+					<p className="patient-appointment-meta">{a.date} • {a.time}</p>
 					{a.waitingTime > 0 && (
-						<p className="text-muted" style={{ fontSize: 12, color: '#0f766e' }}>
+						<p className="patient-appointment-wait">
 							⏱️ Estimated wait: {a.waitingTime} minutes
 						</p>
 					)}
 					{a.reason && (
-						<p className="text-muted" style={{ fontSize: 12, marginTop: 4 }}>
+						<p className="patient-appointment-reason">
 							📝 {a.reason}
 						</p>
 					)}
 				</div>
-				<div style={{ display: 'flex', flexDirection: 'column', gap: 8, alignItems: 'flex-end' }}>
-					<span className={`badge ${a.status === 'confirmed' ? 'badge-green' : a.status === 'cancelled' ? 'badge-red' : a.status === 'completed' ? 'badge-blue' : 'badge-blue'}`}>
+				<div className="patient-appointment-actions">
+					<span className={`badge patient-status-badge ${a.status === 'confirmed' ? 'badge-green' : a.status === 'cancelled' ? 'badge-red' : a.status === 'completed' ? 'badge-blue' : 'badge-blue'}`}>
 						{a.status}
 					</span>
 					{a.status === 'confirmed' && (
 						<button 
-							className="btn btn-outline btn-sm"
-							style={{ padding: '4px 8px', fontSize: '12px' }}
+							className="btn btn-outline btn-sm patient-btn"
 							onClick={() => handleCancelAppointment(a.id)}
 							disabled={loading}
 						>
@@ -248,20 +248,21 @@ function PatientDashboard() {
 	);
 
 	return (
-		<div className="container-responsive" style={{ paddingTop: 24, paddingBottom: 24 }}>
+		<div className="container-responsive patient-dashboard-container">
+			<div className="patient-header">
+				<h1 className="page-title">{me ? `Welcome, ${me.name}` : "Patient Dashboard"}</h1>
+				<p className="page-subtitle">Manage appointments and track your queue in real-time.</p>
+			</div>
 			<div style={{ marginBottom: 24, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
 				<div>
-					<h1 className="page-title">{me ? `Welcome, ${me.name}` : "Patient Dashboard"}</h1>
-					<p className="page-subtitle">Manage appointments and track your queue in real-time.</p>
+					<button 
+						className="btn btn-primary patient-btn"
+						onClick={() => navigate('/map')}
+					>
+						<MapPin size={16} />
+						Find Doctors
+					</button>
 				</div>
-				<button 
-					className="btn btn-primary"
-					onClick={() => navigate('/map')}
-					style={{ display: 'flex', alignItems: 'center', gap: 8 }}
-				>
-					<MapPin size={16} />
-					Find Doctors
-				</button>
 			</div>
 
 			{error && (
@@ -290,29 +291,30 @@ function PatientDashboard() {
 					</motion.div>
 
 					{/* Search Section */}
-					<motion.div layout className="card">
-						<div className="card-header">
-							<h2 className="card-title">Search Patients & Doctors</h2>
+					<motion.div layout className="card patient-card patient-search-container">
+						<div className="card-header patient-card-header">
+							<h2 className="card-title patient-card-title">Search Patients & Doctors</h2>
 							<Search size={20} color="#0f766e" />
 						</div>
-						<div style={{ display: 'flex', gap: 12 }}>
-							<input
-								className="input"
-								type="text"
-								placeholder="Search by name..."
-								value={searchQuery}
-								onChange={(e) => setSearchQuery(e.target.value)}
-								onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-								style={{ flex: 1 }}
-							/>
-							<button 
-								className="btn btn-primary" 
-								onClick={handleSearch}
-								disabled={!searchQuery.trim()}
-							>
-								<Search size={16} />
-								Search
-							</button>
+						<div className="patient-card-body">
+							<div className="patient-search-group">
+								<input
+									className="input patient-search-input"
+									type="text"
+									placeholder="Search by name..."
+									value={searchQuery}
+									onChange={(e) => setSearchQuery(e.target.value)}
+									onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+								/>
+								<button 
+									className="btn btn-primary patient-btn" 
+									onClick={handleSearch}
+									disabled={!searchQuery.trim()}
+								>
+									<Search size={16} />
+									Search
+								</button>
+							</div>
 						</div>
 						{showSearchResults && <SearchResults />}
 					</motion.div>
@@ -323,53 +325,51 @@ function PatientDashboard() {
 					</motion.div>
 
 					{/* Appointments Section */}
-					<motion.div layout className="card" style={{ marginBottom: 24 }}>
-						<div className="card-header">
-							<h2 className="card-title">My Appointments</h2>
+					<motion.div layout className="card patient-card">
+						<div className="card-header patient-card-header">
+							<h2 className="card-title patient-card-title">My Appointments</h2>
 							<CalendarDays size={20} color="#0f766e" />
 						</div>
 
 						{/* Tab Navigation */}
-						<div style={{ display: 'flex', gap: 8, marginBottom: 16, borderBottom: '1px solid #e5e7eb', paddingBottom: 8 }}>
-							<button 
-								className={`btn ${activeTab === 'upcoming' ? 'btn-primary' : 'btn-outline'}`}
-								onClick={() => setActiveTab('upcoming')}
-								style={{ padding: '6px 12px', fontSize: '14px' }}
-							>
-								Upcoming ({appointments.filter(a => a.status === 'confirmed').length})
-							</button>
-							<button 
-								className={`btn ${activeTab === 'completed' ? 'btn-primary' : 'btn-outline'}`}
-								onClick={() => setActiveTab('completed')}
-								style={{ padding: '6px 12px', fontSize: '14px' }}
-							>
-								<CheckCircle size={14} />
-								Completed ({appointments.filter(a => a.status === 'completed').length})
-							</button>
-							<button 
-								className={`btn ${activeTab === 'cancelled' ? 'btn-primary' : 'btn-outline'}`}
-								onClick={() => setActiveTab('cancelled')}
-								style={{ padding: '6px 12px', fontSize: '14px' }}
-							>
-								<AlertCircle size={14} />
-								Cancelled ({appointments.filter(a => a.status === 'cancelled').length})
-							</button>
-							<button 
-								className={`btn ${activeTab === 'all' ? 'btn-primary' : 'btn-outline'}`}
-								onClick={() => setActiveTab('all')}
-								style={{ padding: '6px 12px', fontSize: '14px' }}
-							>
-								All ({appointments.length})
-							</button>
-						</div>
+						<div className="patient-card-body">
+							<div className="patient-tabs">
+								<button 
+									className={`patient-tab ${activeTab === 'upcoming' ? 'active' : ''}`}
+									onClick={() => setActiveTab('upcoming')}
+								>
+									Upcoming ({appointments.filter(a => a.status === 'confirmed').length})
+								</button>
+								<button 
+									className={`patient-tab ${activeTab === 'completed' ? 'active' : ''}`}
+									onClick={() => setActiveTab('completed')}
+								>
+									<CheckCircle size={14} />
+									Completed ({appointments.filter(a => a.status === 'completed').length})
+								</button>
+								<button 
+									className={`patient-tab ${activeTab === 'cancelled' ? 'active' : ''}`}
+									onClick={() => setActiveTab('cancelled')}
+								>
+									<AlertCircle size={14} />
+									Cancelled ({appointments.filter(a => a.status === 'cancelled').length})
+								</button>
+								<button 
+									className={`patient-tab ${activeTab === 'all' ? 'active' : ''}`}
+									onClick={() => setActiveTab('all')}
+								>
+									All ({appointments.length})
+								</button>
+							</div>
 
-						{/* Tab Content */}
-						<ul className="card-list">
-							{activeTab === 'upcoming' && renderAppointmentList(appointments.filter(a => a.status === 'confirmed'), 'No upcoming appointments')}
-							{activeTab === 'completed' && renderAppointmentList(appointments.filter(a => a.status === 'completed'), 'No completed appointments')}
-							{activeTab === 'cancelled' && renderAppointmentList(appointments.filter(a => a.status === 'cancelled'), 'No cancelled appointments')}
-							{activeTab === 'all' && renderAppointmentList(appointments, 'No appointments found')}
-						</ul>
+							{/* Tab Content */}
+							<ul className="card-list patient-appointment-list">
+								{activeTab === 'upcoming' && renderAppointmentList(appointments.filter(a => a.status === 'confirmed'), 'No upcoming appointments')}
+								{activeTab === 'completed' && renderAppointmentList(appointments.filter(a => a.status === 'completed'), 'No completed appointments')}
+								{activeTab === 'cancelled' && renderAppointmentList(appointments.filter(a => a.status === 'cancelled'), 'No cancelled appointments')}
+								{activeTab === 'all' && renderAppointmentList(appointments, 'No appointments found')}
+							</ul>
+						</div>
 					</motion.div>
 
 					<div className="grid grid-2">

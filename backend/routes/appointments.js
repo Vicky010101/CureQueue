@@ -233,9 +233,7 @@ router.get("/admin", auth, roleCheck("admin"), async (req, res) => {
       status: apt.status,
       waitingTime: apt.waitingTime || 0,
       reason: apt.reason,
-      token: apt.token,
-      isOffline: apt.isOffline || false,
-      phone: apt.phone || ''
+      token: apt.token
     }));
 
     res.json({ appointments: appointmentsWithNames });

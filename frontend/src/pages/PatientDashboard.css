@@ -1,0 +1,921 @@
+/* ================================
+   PATIENT DASHBOARD - MODERN HEALTHCARE STYLES
+   ================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap');
+
+:root {
+  /* Healthcare Teal + White Theme */
+  --patient-primary: #0f766e;
+  --patient-primary-hover: #0d5c55;
+  --patient-primary-light: #14b8a6;
+  --patient-primary-soft: rgba(15, 118, 110, 0.1);
+  --patient-success: #059669;
+  --patient-warning: #d97706;
+  --patient-danger: #dc2626;
+  --patient-info: #0284c7;
+  
+  /* Clean Healthcare Background */
+  --patient-bg: #f8fbfb;
+  --patient-bg-gradient: linear-gradient(135deg, #f8fbfb 0%, #f1f5f9 100%);
+  --patient-card-bg: #ffffff;
+  --patient-border: #d1d5db;
+  --patient-border-light: #f3f4f6;
+  --patient-border-focus: #0f766e;
+  
+  /* Professional Typography */
+  --patient-text: #111827;
+  --patient-text-muted: #6b7280;
+  --patient-text-light: #9ca3af;
+  
+  /* Modern Shadows & Effects */
+  --patient-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --patient-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --patient-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --patient-shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  --patient-shadow-hover: 0 8px 25px rgba(15, 118, 110, 0.15);
+  --patient-shadow-focus: 0 0 0 3px rgba(15, 118, 110, 0.1);
+  
+  /* Modern Border Radius */
+  --patient-radius-sm: 8px;
+  --patient-radius-md: 12px;
+  --patient-radius-lg: 16px;
+  --patient-radius-xl: 20px;
+  --patient-radius-pill: 9999px;
+  
+  /* Consistent Spacing */
+  --patient-spacing-xs: 4px;
+  --patient-spacing-sm: 8px;
+  --patient-spacing-md: 16px;
+  --patient-spacing-lg: 24px;
+  --patient-spacing-xl: 32px;
+  --patient-spacing-2xl: 48px;
+}
+
+/* ================================
+   BASE LAYOUT & TYPOGRAPHY
+   ================================ */
+
+.patient-dashboard-container {
+  background: var(--patient-bg);
+  min-height: 100vh;
+  font-family: 'Inter', 'Poppins', 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  color: var(--patient-text);
+  line-height: 1.6;
+  padding: var(--patient-spacing-lg);
+}
+
+.patient-header {
+  margin-bottom: var(--patient-spacing-xl);
+  text-align: center;
+}
+
+.patient-header .page-title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--patient-text);
+  margin-bottom: var(--patient-spacing-sm);
+  letter-spacing: -0.025em;
+  background: linear-gradient(135deg, var(--patient-text) 0%, var(--patient-primary) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.patient-header .page-subtitle {
+  font-size: 1.125rem;
+  color: var(--patient-text-muted);
+  font-weight: 400;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* ================================
+   MODERN HEALTHCARE CARDS
+   ================================ */
+
+.patient-card {
+  background: var(--patient-card-bg);
+  border: 1px solid var(--patient-border);
+  border-radius: var(--patient-radius-lg);
+  box-shadow: var(--patient-shadow-md);
+  margin-bottom: var(--patient-spacing-lg);
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.patient-card:hover {
+  box-shadow: var(--patient-shadow-lg);
+  border-color: var(--patient-primary-light);
+  transform: translateY(-2px);
+}
+
+.patient-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--patient-spacing-lg);
+  border-bottom: 1px solid var(--patient-border-light);
+  background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
+}
+
+.patient-card-title {
+  font-size: 1.375rem;
+  font-weight: 600;
+  color: var(--patient-primary);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--patient-spacing-md);
+  letter-spacing: -0.01em;
+}
+
+.patient-card-body {
+  padding: var(--patient-spacing-lg);
+}
+
+/* ================================
+   APPOINTMENT BOOKING FORM
+   ================================ */
+
+.appointment-section {
+  margin-bottom: var(--patient-spacing-xl);
+}
+
+.appointment-card {
+  background: var(--patient-card-bg);
+  border: 1px solid var(--patient-border);
+  border-radius: var(--patient-radius-lg);
+  box-shadow: var(--patient-shadow-md);
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.appointment-card:hover {
+  box-shadow: var(--patient-shadow-hover);
+  border-color: var(--patient-primary-light);
+}
+
+.appointment-form {
+  padding: var(--patient-spacing-lg);
+}
+
+
+.form-modern .form-field {
+  margin-bottom: var(--patient-spacing-lg);
+}
+
+.form-modern .label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--patient-text);
+  margin-bottom: var(--patient-spacing-sm);
+  letter-spacing: 0.01em;
+}
+
+.form-modern .label::after {
+  content: '';
+}
+
+.form-modern .form-field:has(input[required]) .label::after,
+.form-modern .form-field:has(select[required]) .label::after {
+  content: ' *';
+  color: var(--patient-danger);
+  font-weight: 600;
+}
+
+.form-modern .input {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid var(--patient-border);
+  border-radius: var(--patient-radius-md);
+  font-size: 0.875rem;
+  color: var(--patient-text);
+  background: var(--patient-card-bg);
+  font-family: inherit;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  outline: none;
+}
+
+.form-modern .input:focus {
+  border-color: var(--patient-border-focus);
+  box-shadow: var(--patient-shadow-focus);
+}
+
+.form-modern .input:hover:not(:focus) {
+  border-color: var(--patient-primary-light);
+}
+
+.form-modern .input::placeholder {
+  color: var(--patient-text-light);
+  font-size: 0.875rem;
+}
+
+.form-modern .input:invalid:not(:placeholder-shown) {
+  border-color: var(--patient-danger);
+}
+
+.form-modern .input:valid:not(:placeholder-shown) {
+  border-color: var(--patient-success);
+}
+
+/* Grid Layout for Form Fields */
+.grid.grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--patient-spacing-lg);
+}
+
+@media (max-width: 768px) {
+  .grid.grid-2 {
+    grid-template-columns: 1fr;
+    gap: var(--patient-spacing-md);
+  }
+}
+
+/* ================================
+   MODERN BUTTONS
+   ================================ */
+
+.patient-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--patient-spacing-sm);
+  padding: 12px 20px;
+  border-radius: var(--patient-radius-pill);
+  border: 1px solid transparent;
+  font-size: 0.875rem;
+  font-weight: 500;
+  font-family: inherit;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  white-space: nowrap;
+  outline: none;
+}
+
+.btn.btn-primary {
+  background: var(--patient-primary);
+  color: white;
+  border-color: var(--patient-primary);
+  box-shadow: var(--patient-shadow-sm);
+}
+
+.btn.btn-primary:hover {
+  background: var(--patient-primary-hover);
+  box-shadow: var(--patient-shadow-hover);
+  transform: translateY(-1px);
+}
+
+.btn.btn-primary:focus {
+  box-shadow: var(--patient-shadow-focus);
+}
+
+.btn.btn-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn.btn-outline {
+  background: transparent;
+  color: var(--patient-text-muted);
+  border-color: var(--patient-border);
+}
+
+.btn.btn-outline:hover {
+  background: var(--patient-border-light);
+  border-color: var(--patient-primary);
+  color: var(--patient-primary);
+}
+
+.btn.btn-outline.active,
+.btn.btn-outline.btn-primary {
+  background: var(--patient-primary);
+  color: white;
+  border-color: var(--patient-primary);
+}
+
+.btn.btn-sm {
+  padding: 6px 12px;
+  font-size: 0.8125rem;
+  border-radius: var(--patient-radius-md);
+}
+
+/* ================================
+   TAB NAVIGATION (PILL STYLE)
+   ================================ */
+
+.patient-tabs {
+  display: flex;
+  gap: var(--patient-spacing-sm);
+  margin: var(--patient-spacing-lg) 0 var(--patient-spacing-md) 0;
+  border-bottom: 1px solid var(--patient-border-light);
+  padding-bottom: var(--patient-spacing-sm);
+  flex-wrap: wrap;
+}
+
+.patient-tab {
+  padding: 8px 16px;
+  border-radius: var(--patient-radius-pill);
+  border: 1px solid var(--patient-border);
+  background: var(--patient-card-bg);
+  color: var(--patient-text-muted);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  align-items: center;
+  gap: var(--patient-spacing-xs);
+  white-space: nowrap;
+}
+
+.patient-tab:hover {
+  background: var(--patient-primary-soft);
+  border-color: var(--patient-primary-light);
+  color: var(--patient-primary);
+}
+
+.patient-tab.active {
+  background: var(--patient-primary);
+  color: white;
+  border-color: var(--patient-primary);
+  box-shadow: var(--patient-shadow-sm);
+}
+
+/* ================================
+   APPOINTMENT LISTS
+   ================================ */
+
+.patient-appointment-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: var(--patient-spacing-md);
+}
+
+.patient-appointment-item {
+  background: var(--patient-card-bg);
+  border: 1px solid var(--patient-border-light);
+  border-radius: var(--patient-radius-md);
+  padding: var(--patient-spacing-md);
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  transition: all 0.2s ease;
+}
+
+.patient-appointment-item:hover {
+  box-shadow: var(--patient-shadow-md);
+  border-color: var(--patient-primary-light);
+  background: linear-gradient(135deg, #ffffff 0%, #f8fbfb 100%);
+}
+
+.patient-appointment-info {
+  flex: 1;
+}
+
+.patient-appointment-doctor {
+  font-weight: 600;
+  color: var(--patient-text);
+  margin-bottom: 4px;
+  font-size: 1rem;
+}
+
+.patient-appointment-meta {
+  display: flex;
+  align-items: center;
+  gap: var(--patient-spacing-sm);
+  color: var(--patient-text-muted);
+  font-size: 0.875rem;
+  margin-bottom: 4px;
+}
+
+.patient-appointment-reason {
+  color: var(--patient-text-light);
+  font-size: 0.8125rem;
+  display: flex;
+  align-items: center;
+  gap: var(--patient-spacing-xs);
+  margin-top: 8px;
+}
+
+.patient-appointment-wait {
+  color: var(--patient-primary);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: var(--patient-spacing-xs);
+}
+
+.patient-appointment-actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--patient-spacing-sm);
+  align-items: flex-end;
+}
+
+/* ================================
+   STATUS BADGES
+   ================================ */
+
+.patient-status-badge {
+  padding: 4px 12px;
+  border-radius: var(--patient-radius-pill);
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: capitalize;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.badge.badge-green,
+.patient-status-confirmed {
+  background: #d1fae5;
+  color: #065f46;
+  border: 1px solid #a7f3d0;
+}
+
+.badge.badge-blue,
+.patient-status-completed {
+  background: #dbeafe;
+  color: #1e40af;
+  border: 1px solid #93c5fd;
+}
+
+.badge.badge-red,
+.patient-status-cancelled {
+  background: #fee2e2;
+  color: #991b1b;
+  border: 1px solid #fca5a5;
+}
+
+/* ================================
+   SEARCH SECTION
+   ================================ */
+
+.patient-search-container {
+  margin-bottom: var(--patient-spacing-xl);
+}
+
+.patient-search-group {
+  display: flex;
+  gap: var(--patient-spacing-md);
+  align-items: center;
+}
+
+.patient-search-input {
+  flex: 1;
+  padding: 12px 16px;
+  border: 1px solid var(--patient-border);
+  border-radius: var(--patient-radius-md);
+  font-size: 0.875rem;
+  background: var(--patient-card-bg);
+  transition: all 0.2s ease;
+}
+
+.patient-search-input:focus {
+  outline: none;
+  border-color: var(--patient-border-focus);
+  box-shadow: var(--patient-shadow-focus);
+}
+
+/* ================================
+   BOOKING SUCCESS STATE
+   ================================ */
+
+.patient-booking-success {
+  background: #f0fdf4;
+  border: 2px solid #bbf7d0;
+  border-radius: var(--patient-radius-lg);
+  padding: var(--patient-spacing-lg);
+  margin: var(--patient-spacing-lg) 0;
+  animation: slideIn 0.3s ease;
+}
+
+.patient-booking-success-header {
+  display: flex;
+  align-items: center;
+  gap: var(--patient-spacing-sm);
+  margin-bottom: var(--patient-spacing-md);
+}
+
+.patient-booking-success-title {
+  font-weight: 600;
+  color: #059669;
+  font-size: 1.125rem;
+}
+
+.patient-booking-details {
+  display: grid;
+  gap: var(--patient-spacing-sm);
+  margin-bottom: var(--patient-spacing-lg);
+}
+
+.patient-booking-detail {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.875rem;
+  padding: 8px 0;
+  border-bottom: 1px solid #d1fae5;
+}
+
+.patient-booking-detail:last-child {
+  border-bottom: none;
+}
+
+.patient-booking-detail strong {
+  color: var(--patient-text);
+  font-weight: 500;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* ================================
+   QUEUE STATUS SECTION
+   ================================ */
+
+.patient-queue-status {
+  background: linear-gradient(135deg, var(--patient-primary-soft) 0%, #ffffff 100%);
+  border: 1px solid var(--patient-primary-light);
+  border-radius: var(--patient-radius-lg);
+  padding: var(--patient-spacing-lg);
+  text-align: center;
+}
+
+.patient-token-display {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--patient-primary);
+  margin-bottom: var(--patient-spacing-sm);
+}
+
+/* ================================
+   LOADING STATES
+   ================================ */
+
+.patient-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: var(--patient-spacing-xl);
+  color: var(--patient-text-muted);
+}
+
+.patient-empty {
+  text-align: center;
+  padding: var(--patient-spacing-xl);
+  color: var(--patient-text-muted);
+  font-size: 0.875rem;
+}
+
+.spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--patient-border);
+  border-top: 2px solid var(--patient-primary);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* ================================
+   MAP CARD COMPONENT STYLING
+   ================================ */
+
+/* Modern Map Card Container */
+.doctor-map-search-card {
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+  padding: 16px 20px;
+  margin-bottom: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  overflow: hidden;
+  transition: all 0.2s ease;
+  border: 1px solid var(--patient-border-light);
+}
+
+.doctor-map-search-card:hover {
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+  border-color: var(--patient-primary-light);
+  transform: translateY(-1px);
+}
+
+/* Map Card Header */
+.doctor-map-search-card .card-header {
+  background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
+  border-bottom: 1px solid var(--patient-border-light);
+  border-radius: 12px 12px 0 0;
+  margin: -16px -20px 16px -20px;
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.doctor-map-search-card .card-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #0f766e;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  letter-spacing: -0.01em;
+}
+
+/* Search Form Styling */
+.doctor-map-search-card form {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.doctor-map-search-card .input {
+  border: 1px solid var(--patient-border);
+  border-radius: 12px;
+  padding: 12px 16px;
+  font-size: 14px;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  background: var(--patient-card-bg);
+}
+
+.doctor-map-search-card .input:focus {
+  border-color: #0f766e;
+  box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.1);
+  outline: none;
+}
+
+.doctor-map-search-card .btn {
+  border-radius: 12px;
+  padding: 12px 16px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.doctor-map-search-card .btn-primary {
+  background: #0f766e;
+  border-color: #0f766e;
+  color: white;
+}
+
+.doctor-map-search-card .btn-primary:hover {
+  background: #0d5c55;
+  box-shadow: 0 4px 12px rgba(15, 118, 110, 0.2);
+  transform: translateY(-1px);
+}
+
+.doctor-map-search-card .btn-outline {
+  background: transparent;
+  border: 1px solid var(--patient-border);
+  color: var(--patient-text-muted);
+}
+
+.doctor-map-search-card .btn-outline:hover {
+  background: var(--patient-border-light);
+  border-color: #0f766e;
+  color: #0f766e;
+}
+
+/* Map Frame Container */
+.doctor-map-frame {
+  width: 100%;
+  height: 360px;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  overflow: hidden;
+  margin-bottom: 16px;
+  position: relative;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  transition: all 0.2s ease;
+}
+
+.doctor-map-frame:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.doctor-map-frame iframe {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  object-fit: cover;
+}
+
+/* Selected Facility Details */
+.doctor-map-search-card .card {
+  background: var(--patient-card-bg);
+  border: 1px solid var(--patient-border);
+  border-radius: 12px;
+  margin-top: 16px;
+  overflow: hidden;
+  transition: all 0.2s ease;
+}
+
+.doctor-map-search-card .card:hover {
+  border-color: #0f766e;
+  box-shadow: 0 2px 8px rgba(15, 118, 110, 0.1);
+}
+
+/* No Results State */
+.doctor-map-no-results {
+  text-align: center;
+  padding: 32px 16px;
+  color: var(--patient-text-muted);
+  background: var(--patient-border-light);
+  border-radius: 12px;
+  margin: 16px 0;
+}
+
+.doctor-map-no-results svg {
+  opacity: 0.5;
+  margin-bottom: 16px;
+}
+
+.doctor-map-no-results p {
+  margin: 8px 0;
+  font-size: 14px;
+}
+
+/* Responsive Design for Map Card */
+@media (max-width: 768px) {
+  .doctor-map-search-card {
+    padding: 12px 16px;
+    margin-bottom: 16px;
+  }
+  
+  .doctor-map-search-card .card-header {
+    margin: -12px -16px 12px -16px;
+    padding: 12px 16px;
+  }
+  
+  .doctor-map-frame {
+    height: 260px;
+  }
+  
+  .doctor-map-search-card form {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .doctor-map-search-card .input {
+    padding-left: 40px;
+  }
+  
+  .doctor-map-search-card .btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 640px) {
+  .doctor-map-frame {
+    height: 240px;
+    border-radius: 8px;
+  }
+  
+  .doctor-map-search-card {
+    padding: 10px 14px;
+    border-radius: 12px;
+  }
+  
+  .doctor-map-search-card .card-title {
+    font-size: 14px;
+  }
+}
+
+/* Ensure consistency with other dashboard cards */
+@media (min-width: 1024px) {
+  .doctor-map-search-card {
+    margin-bottom: 24px;
+  }
+  
+  .doctor-map-frame {
+    height: 380px;
+  }
+}
+
+/* ================================
+   RESPONSIVE DESIGN
+   ================================ */
+
+@media (max-width: 1024px) {
+  .patient-dashboard-container {
+    padding: var(--patient-spacing-md);
+  }
+  
+  .patient-header .page-title {
+    font-size: 2rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .patient-dashboard-container {
+    padding: var(--patient-spacing-md);
+  }
+  
+  .patient-header {
+    text-align: left;
+  }
+  
+  .patient-header .page-title {
+    font-size: 1.75rem;
+  }
+  
+  .patient-card-header {
+    flex-direction: column;
+    gap: var(--patient-spacing-md);
+    align-items: stretch;
+  }
+  
+  .patient-tabs {
+    justify-content: center;
+  }
+  
+  .patient-appointment-item {
+    flex-direction: column;
+    gap: var(--patient-spacing-md);
+    align-items: stretch;
+  }
+  
+  .patient-appointment-actions {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .patient-search-group {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
+@media (max-width: 640px) {
+  .patient-btn {
+    justify-content: center;
+    width: 100%;
+  }
+  
+  .patient-tabs {
+    flex-direction: column;
+  }
+  
+  .patient-tab {
+    justify-content: center;
+  }
+}
+
+/* ================================
+   ACCESSIBILITY & FOCUS STATES
+   ================================ */
+
+.patient-btn:focus,
+.form-modern .input:focus,
+.patient-tab:focus {
+  outline: 2px solid var(--patient-primary);
+  outline-offset: 2px;
+}
+
+.patient-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.patient-btn:disabled:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+/* Screen reader only */
+.patient-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}

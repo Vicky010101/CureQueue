@@ -10,22 +10,19 @@ router.get("/dashboard", auth, roleCheck("doctor", "admin"), (req, res) => {
 router.get("/appointments", auth, roleCheck("doctor", "admin"), async (req, res) => {
     try {
         const appts = await Appointment.find({ doctorId: req.user.id })
-            .populate('patientId', 'name')
-            .populate('doctorId', 'name')
+            .populate('patientId', 'name phone')
             .sort({ date: 1, time: 1 });
 
         const appointmentsForDoctor = appts.map(apt => ({
             _id: apt._id,
             patientName: apt.isOffline ? apt.patientName : (apt.patientId?.name || 'Unknown Patient'),
-            doctorName: apt.doctorId?.name ? 'Dr. ' + apt.doctorId.name : 'Doctor',
             date: apt.date,
             time: apt.time,
             status: apt.status,
             waitingTime: apt.waitingTime || 0,
             reason: apt.reason,
             token: apt.token,
-            isOffline: apt.isOffline || false,
-            phone: apt.phone || ''
+            phone: apt.isOffline ? apt.phone : (apt.patientId?.phone || '')
         }));
 
         res.json({ appointments: appointmentsForDoctor });

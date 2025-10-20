@@ -1,7 +1,8 @@
 import React, { useEffect, useState, useMemo } from "react";
 import API from "../api";
 import { motion } from "framer-motion";
-import { ClipboardList, CalendarDays, X, User, Clock, FileText, CheckCircle, History, AlertCircle, Pencil, XCircle, Search, UserPlus } from "lucide-react";
+import './DoctorDashboard.css';
+import { ClipboardList, CalendarDays, X, User, Clock, FileText, CheckCircle, History, AlertCircle, Pencil, XCircle, Search, UserPlus, Phone } from "lucide-react";
 import { toast } from "sonner";
 import { queueBus } from "../lib/eventBus";
 
@@ -45,7 +46,7 @@ function DoctorDashboard() {
 				reason: a.reason,
 				token: a.token,
 				waitingTime: a.waitingTime || 0,
-				isOffline: a.isOffline || false
+				phone: a.phone || ''
 			}));
 			console.log('Transformed appointments:', transformedAppointments);
 			setAppointments(transformedAppointments);
@@ -58,7 +59,7 @@ function DoctorDashboard() {
 			const todayStr = `${yyyy}-${mm}-${dd}`;
 			
 			const allAppts = appointmentData.map(a => ({ 
-				id: a._id, patient: a.patientName, time: a.time, date: a.date, status: a.status, reason: a.reason, token: a.token, waitingTime: a.waitingTime
+				id: a._id, patient: a.patientName, time: a.time, date: a.date, status: a.status, reason: a.reason, token: a.token, waitingTime: a.waitingTime, phone: a.phone || ''
 			}));
 			const today = allAppts.filter(a => a.date === todayStr && a.status === 'confirmed');
 			const past = allAppts.filter(a => a.date < todayStr && a.status === 'completed');
@@ -390,8 +391,7 @@ function DoctorDashboard() {
 				reason: newAppointment.reason,
 				token: newAppointment.token,
 				waitingTime: newAppointment.waitingTime || 0,
-				isOffline: true,
-				phone: newAppointment.phone || offlinePatientForm.phone || ''
+				isOffline: true
 			};
 
 			// Create legacy appointment object for backward compatibility
@@ -469,6 +469,23 @@ function DoctorDashboard() {
 		return completeAppointment(appointmentId);
 	};
 
+	// Call patient function
+	const callPatient = (appointment) => {
+		const phoneNumber = appointment.phone || appointment.patientPhone;
+		if (phoneNumber) {
+			try {
+				// Use tel: protocol to trigger phone dialer
+				window.location.href = `tel:${phoneNumber}`;
+				toast.success(`Calling ${appointment.patientName || 'patient'} at ${phoneNumber}`);
+			} catch (error) {
+				console.error('Call error:', error);
+				toast.error('Unable to initiate call');
+			}
+		} else {
+			toast.warning('Phone number not available for this patient');
+		}
+	};
+
 	// Status badge helper
 	const statusBadgeClass = (status) => {
 		if (status === 'completed') return 'badge badge-green';
@@ -535,7 +552,10 @@ function DoctorDashboard() {
 				<div style={{ display: 'flex', flexDirection: 'column', gap: 8, alignItems: 'flex-end' }}>
 					<span className={`badge ${a.status === 'confirmed' ? 'badge-green' : a.status === 'cancelled' ? 'badge-red' : a.status === 'completed' ? 'badge-blue' : 'badge-blue'}`}>{a.status}</span>
 					{a.status === 'confirmed' && (
-						<div style={{ display: 'flex', gap: 4 }}>
+						<div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
+							{a.phone && (
+								<button className="btn btn-call btn-sm doctor-btn-call" style={{ padding: '4px 8px', fontSize: '12px' }} onClick={() => callPatient(a)} title={`Call ${a.patient || 'patient'}`}><Phone size={12} />Call</button>
+							)}
 							<button className="btn btn-outline btn-sm" style={{ padding: '4px 8px', fontSize: '12px' }} onClick={() => handleCompleteAppointment(a.id)} title="Mark as completed"><CheckCircle size={12} />Complete</button>
 							<button className="btn btn-outline btn-sm" style={{ padding: '4px 8px', fontSize: '12px' }} onClick={() => handleCancelAppointment(a.id)} title="Cancel appointment"><X size={12} />Cancel</button>
 						</div>
@@ -546,20 +566,20 @@ function DoctorDashboard() {
 	};
 
 	return (
-		<div className="container-responsive" style={{ paddingTop: 24, paddingBottom: 24 }}>
-			<div style={{ marginBottom: 24 }}>
+		<div className="container-responsive doctor-dashboard-container">
+			<div className="doctor-header">
 				<h1 className="page-title">{me ? `Welcome, Dr. ${me.name}` : "Doctor Dashboard"}</h1>
 				<p className="page-subtitle">Your schedule and current queue at a glance.</p>
 			</div>
 
 			{/* Enhanced Appointments Section with Advanced Management Features */}
-			<motion.div layout className="card" style={{ marginBottom: 24 }}>
-				<div className="card-header">
+			<motion.div layout className="card doctor-card">
+				<div className="card-header doctor-card-header">
 					<div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-						<h2 className="card-title">Appointments Management</h2>
-						<CalendarDays size={20} color="#0f766e" />
+						<h2 className="card-title doctor-card-title">Appointments Management</h2>
+						<CalendarDays size={20} color="#007bff" />
 					</div>
-					<button className="btn btn-primary" onClick={toggleAddForm} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+					<button className="btn btn-primary doctor-btn doctor-btn-primary" onClick={toggleAddForm}>
 						<UserPlus size={16} />
 						{showAddForm ? 'Cancel' : 'Add Patient'}
 					</button>
@@ -571,68 +591,58 @@ function DoctorDashboard() {
 						initial={{ opacity: 0, height: 0 }}
 						animate={{ opacity: 1, height: 'auto' }}
 						exit={{ opacity: 0, height: 0 }}
-						style={{
-							padding: '16px',
-							margin: '8px 0',
-							background: '#f8fafc',
-							border: '1px solid #e2e8f0',
-							borderRadius: '8px'
-						}}
+						className="doctor-add-form"
 					>
-						<h4 style={{ margin: '0 0 12px 0', fontSize: '16px', fontWeight: '600', color: '#1e293b' }}>
+						<h4 className="doctor-form-title">
 							Add Offline Patient
 						</h4>
-						<p style={{ margin: '0 0 16px 0', fontSize: '13px', color: '#64748b' }}>
+						<p className="doctor-form-subtitle">
 							This patient is being added offline for in-clinic queue management only.
 						</p>
 
-						<div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '12px' }}>
-							<div className="form-field">
-								<label className="label" style={{ fontSize: '14px' }}>Patient Name *</label>
+						<div className="doctor-form-grid">
+							<div className="form-field doctor-form-field">
+								<label className="label doctor-form-label">Patient Name *</label>
 								<input
-									className="input"
+									className="input doctor-form-input"
 									name="patientName"
 									value={offlinePatientForm.patientName}
 									onChange={handleFormChange}
 									placeholder="Enter patient name"
-									style={{ fontSize: '14px' }}
 									required
 								/>
 							</div>
-							<div className="form-field">
-								<label className="label" style={{ fontSize: '14px' }}>Phone Number</label>
+							<div className="form-field doctor-form-field">
+								<label className="label doctor-form-label">Phone Number</label>
 								<input
-									className="input"
+									className="input doctor-form-input"
 									name="phone"
 									value={offlinePatientForm.phone}
 									onChange={handleFormChange}
 									placeholder="Enter phone number"
-									style={{ fontSize: '14px' }}
 								/>
 							</div>
 						</div>
 
-						<div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '16px' }}>
-							<div className="form-field">
-								<label className="label" style={{ fontSize: '14px' }}>Age</label>
+						<div className="doctor-form-grid">
+							<div className="form-field doctor-form-field">
+								<label className="label doctor-form-label">Age</label>
 								<input
-									className="input"
+									className="input doctor-form-input"
 									name="age"
 									type="number"
 									value={offlinePatientForm.age}
 									onChange={handleFormChange}
 									placeholder="Age"
-									style={{ fontSize: '14px' }}
 								/>
 							</div>
-							<div className="form-field">
-								<label className="label" style={{ fontSize: '14px' }}>Gender</label>
+							<div className="form-field doctor-form-field">
+								<label className="label doctor-form-label">Gender</label>
 								<select
-									className="input"
+									className="input doctor-form-select"
 									name="gender"
 									value={offlinePatientForm.gender}
 									onChange={handleFormChange}
-									style={{ fontSize: '14px' }}
 								>
 									<option value="">Select Gender</option>
 									<option value="Male">Male</option>
@@ -642,22 +652,20 @@ function DoctorDashboard() {
 							</div>
 						</div>
 
-						<div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-							<div style={{ fontSize: '13px', color: '#64748b' }}>
+						<div className="doctor-form-actions">
+							<div className="doctor-token-info">
 								<strong>Next Token:</strong> #{calculateNextToken()} | <strong>Estimated Wait:</strong> {calculateWaitingTime()} minutes
 							</div>
-							<div style={{ display: 'flex', gap: '8px' }}>
+							<div className="doctor-form-buttons">
 								<button
-									className="btn btn-outline btn-sm"
+									className="btn btn-outline btn-sm doctor-btn doctor-btn-outline"
 									onClick={toggleAddForm}
-									style={{ fontSize: '14px', padding: '6px 12px' }}
 								>
 									Cancel
 								</button>
 								<button
-									className="btn btn-primary btn-sm"
+									className="btn btn-primary btn-sm doctor-btn doctor-btn-primary"
 									onClick={submitOfflinePatient}
-									style={{ fontSize: '14px', padding: '6px 12px', display: 'flex', alignItems: 'center', gap: '4px' }}
 								>
 									<UserPlus size={14} />
 									Add Patient
@@ -668,76 +676,79 @@ function DoctorDashboard() {
 				)}
 
 				{/* Enhanced Toolbar: search + filters */}
-				<div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center', margin: '8px 0 12px 0' }}>
-					<div style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+				<div className="doctor-toolbar">
+					<div className="doctor-search-group">
 						<Search size={14} color="#6b7280" />
 						<input
-							className="input"
+							className="doctor-search-input"
 							placeholder="Search patient or doctor"
 							value={searchQuery}
 							onChange={(e) => setSearchQuery(e.target.value)}
-							style={{ width: 220 }}
 						/>
 					</div>
-					<div style={{ display: 'inline-flex', gap: 6, flexWrap: 'wrap' }}>
-						<button className={`btn ${filter === 'all' ? 'btn-primary btn-pill' : 'btn-outline btn-pill'}`} onClick={() => setFilter('all')}>All</button>
-						<button className={`btn ${filter === 'today' ? 'btn-primary btn-pill' : 'btn-outline btn-pill'}`} onClick={() => setFilter('today')}>Today</button>
-						<button className={`btn ${filter === 'pending' ? 'btn-primary btn-pill' : 'btn-outline btn-pill'}`} onClick={() => setFilter('pending')}>Pending</button>
-						<button className={`btn ${filter === 'completed' ? 'btn-primary btn-pill' : 'btn-outline btn-pill'}`} onClick={() => setFilter('completed')}>Completed</button>
-						<button className={`btn ${filter === 'cancelled' ? 'btn-primary btn-pill' : 'btn-outline btn-pill'}`} onClick={() => setFilter('cancelled')}>Cancelled</button>
+					<div className="doctor-filter-group">
+						<button className={`doctor-filter-btn ${filter === 'all' ? 'active' : ''}`} onClick={() => setFilter('all')}>All</button>
+						<button className={`doctor-filter-btn ${filter === 'today' ? 'active' : ''}`} onClick={() => setFilter('today')}>Today</button>
+						<button className={`doctor-filter-btn ${filter === 'pending' ? 'active' : ''}`} onClick={() => setFilter('pending')}>Pending</button>
+						<button className={`doctor-filter-btn ${filter === 'completed' ? 'active' : ''}`} onClick={() => setFilter('completed')}>Completed</button>
+						<button className={`doctor-filter-btn ${filter === 'cancelled' ? 'active' : ''}`} onClick={() => setFilter('cancelled')}>Cancelled</button>
 					</div>
 				</div>
 
 				{/* Enhanced Table View */}
 				{loading ? (
-					<p className="text-muted">Loading...</p>
+					<p className="text-muted doctor-loading">Loading...</p>
 				) : (
-					<div className="table-modern">
-						<div className="table-row table-header">
-							<div className="table-cell">Patient</div>
-							<div className="table-cell">Doctor</div>
-							<div className="table-cell">Date</div>
-							<div className="table-cell">Time (IST)</div>
-							<div className="table-cell">Status</div>
-							<div className="table-cell">Waiting</div>
-							<div className="table-cell" style={{ textAlign: 'right' }}>Actions</div>
+					<div className="table-modern doctor-table">
+						<div className="table-row table-header doctor-table-header">
+							<div className="table-cell doctor-table-cell">Patient</div>
+							<div className="table-cell doctor-table-cell">Doctor</div>
+							<div className="table-cell doctor-table-cell">Date</div>
+							<div className="table-cell doctor-table-cell">Time (IST)</div>
+							<div className="table-cell doctor-table-cell">Status</div>
+							<div className="table-cell doctor-table-cell">Waiting</div>
+							<div className="table-cell doctor-table-cell" style={{ textAlign: 'right' }}>Actions</div>
 						</div>
 						{[...filteredAppointments].sort((a,b) => (a.waitingTime||0) - (b.waitingTime||0)).map((a) => (
-							<div key={a._id} className="table-row">
-								<div className="table-cell">{a.patientName || 'Patient'}</div>
-								<div className="table-cell">{a.doctorName || 'Doctor'}</div>
-								<div className="table-cell">{a.date}</div>
-								<div className="table-cell">{a.time}</div>
-								<div className="table-cell">
-									<span className={statusBadgeClass(a.status)}>{a.status}</span>
+							<div key={a._id} className="table-row doctor-table-row">
+								<div className="table-cell doctor-table-cell">{a.patientName || 'Patient'}</div>
+								<div className="table-cell doctor-table-cell">{a.doctorName || 'Doctor'}</div>
+								<div className="table-cell doctor-table-cell">{a.date}</div>
+								<div className="table-cell doctor-table-cell">{a.time}</div>
+								<div className="table-cell doctor-table-cell">
+									<span className={`${statusBadgeClass(a.status)} doctor-status-badge doctor-status-${a.status}`}>{a.status}</span>
 								</div>
-								<div className="table-cell" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+								<div className="table-cell doctor-table-cell doctor-waiting-time">
 									<Clock size={14} color="#6b7280" /> {a.waitingTime || 0} min
 								</div>
-								<div className="table-cell" style={{ textAlign: 'right' }}>
+								<div className="table-cell doctor-table-cell" style={{ textAlign: 'right' }}>
 									{editingId === a._id ? (
-										<div style={{ display: 'inline-flex', gap: 6, alignItems: 'center' }}>
+										<div className="doctor-edit-group">
 											<input 
-												className="input" 
+												className="input doctor-edit-input" 
 												type="number" 
-												style={{ width: 80 }} 
 												value={editWaiting} 
 												onChange={(e) => setEditWaiting(e.target.value)}
 											/>
-											<button className="btn btn-primary btn-sm" onClick={saveEdit}>Save</button>
-											<button className="btn btn-sm" onClick={() => setEditingId(null)}>Cancel</button>
+											<button className="btn btn-primary btn-sm doctor-btn doctor-btn-sm doctor-btn-primary" onClick={saveEdit}>Save</button>
+											<button className="btn btn-sm doctor-btn doctor-btn-sm doctor-btn-outline" onClick={() => setEditingId(null)}>Cancel</button>
 										</div>
 									) : (
-										<div style={{ display: 'inline-flex', gap: 6 }}>
-											<button className="btn btn-outline btn-sm" title="Update waiting time" onClick={() => openEdit(a)}><Pencil size={12} /> Update</button>
+										<div className="doctor-table-actions">
+											{a.phone && (
+												<button className="btn btn-call doctor-btn doctor-btn-sm doctor-btn-call" title={`Call ${a.patientName || 'patient'}`} onClick={() => callPatient(a)}>
+													<Phone size={12} />
+												</button>
+											)}
+											<button className="btn btn-outline btn-sm doctor-btn doctor-btn-sm doctor-btn-outline" title="Update waiting time" onClick={() => openEdit(a)}><Pencil size={12} /></button>
 											{a.status !== 'completed' && (
-												<button className="btn btn-outline btn-sm" title="Complete" onClick={() => completeAppointment(a._id)}>
-													<CheckCircle size={12} /> Complete
+												<button className="btn btn-outline btn-sm doctor-btn doctor-btn-sm doctor-btn-outline" title="Complete" onClick={() => completeAppointment(a._id)}>
+													<CheckCircle size={12} />
 												</button>
 											)}
 											{a.status !== 'cancelled' && (
-												<button className="btn btn-outline btn-sm" title="Cancel" onClick={() => cancelAppointment(a._id)}>
-													<XCircle size={12} /> Cancel
+												<button className="btn btn-outline btn-sm doctor-btn doctor-btn-sm doctor-btn-danger" title="Cancel" onClick={() => cancelAppointment(a._id)}>
+													<XCircle size={12} />
 												</button>
 											)}
 										</div>
@@ -749,15 +760,15 @@ function DoctorDashboard() {
 				)}
 
 				{/* Legacy Tab Navigation for backward compatibility */}
-				<div style={{ display: 'flex', gap: 8, marginTop: 16, marginBottom: 16, borderBottom: '1px solid #e5e7eb', paddingBottom: 8 }}>
-					<button className={`btn ${activeTab === 'today' ? 'btn-primary' : 'btn-outline'}`} onClick={() => setActiveTab('today')} style={{ padding: '6px 12px', fontSize: '14px' }}>Today's ({todayAppointments.length})</button>
-					<button className={`btn ${activeTab === 'past' ? 'btn-primary' : 'btn-outline'}`} onClick={() => setActiveTab('past')} style={{ padding: '6px 12px', fontSize: '14px' }}><History size={14} />Past ({pastAppointments.length})</button>
-					<button className={`btn ${activeTab === 'cancelled' ? 'btn-primary' : 'btn-outline'}`} onClick={() => setActiveTab('cancelled')} style={{ padding: '6px 12px', fontSize: '14px' }}><AlertCircle size={14} />Cancelled ({cancelledAppointments.length})</button>
-					<button className={`btn ${activeTab === 'all' ? 'btn-primary' : 'btn-outline'}`} onClick={() => setActiveTab('all')} style={{ padding: '6px 12px', fontSize: '14px' }}>All ({allAppointments.length})</button>
+				<div className="doctor-tabs">
+					<button className={`btn doctor-tab ${activeTab === 'today' ? 'active' : ''}`} onClick={() => setActiveTab('today')}>Today's ({todayAppointments.length})</button>
+					<button className={`btn doctor-tab ${activeTab === 'past' ? 'active' : ''}`} onClick={() => setActiveTab('past')}><History size={14} />Past ({pastAppointments.length})</button>
+					<button className={`btn doctor-tab ${activeTab === 'cancelled' ? 'active' : ''}`} onClick={() => setActiveTab('cancelled')}><AlertCircle size={14} />Cancelled ({cancelledAppointments.length})</button>
+					<button className={`btn doctor-tab ${activeTab === 'all' ? 'active' : ''}`} onClick={() => setActiveTab('all')}>All ({allAppointments.length})</button>
 				</div>
 
 				{/* Legacy Tab Content for backward compatibility */}
-				<ul className="card-list">
+				<ul className="card-list doctor-appointment-list">
 					{activeTab === 'today' && renderAppointmentList(todayAppointments, 'No appointments scheduled for today')}
 					{activeTab === 'past' && renderAppointmentList(pastAppointments, 'No completed appointments found')}
 					{activeTab === 'cancelled' && renderAppointmentList(cancelledAppointments, 'No cancelled appointments found')}
@@ -766,25 +777,25 @@ function DoctorDashboard() {
 			</motion.div>
 
 			{/* Current Queue section now shows today's appointments with tokens */}
-			<motion.div layout className="card">
-				<div className="card-header">
-					<h2 className="card-title">Current Queue</h2>
-					<ClipboardList size={20} color="#0f766e" />
+			<motion.div layout className="card doctor-card">
+				<div className="card-header doctor-card-header">
+					<h2 className="card-title doctor-card-title">Current Queue</h2>
+					<ClipboardList size={20} color="#007bff" />
 				</div>
-				<ul className="card-list">
+				<div className="doctor-card-body">
 					{todayAppointments.length > 0 ? (
 						todayAppointments
 							.sort((a,b) => (a.token||0) - (b.token||0))
 							.map((a) => (
-								<li key={a.id} className="list-item">
-									<span style={{ fontWeight: 600 }}>{a.patient}</span>
-									<span className="badge">Token: {a.token ?? '-'}</span>
-								</li>
+								<div key={a.id} className="doctor-queue-item">
+									<span className="doctor-queue-patient">{a.patient}</span>
+									<span className="doctor-queue-token">{a.token ?? '-'}</span>
+								</div>
 							))
 					) : (
-						<li className="list-item"><span className="text-muted">No patients in queue</span></li>
+						<div className="doctor-empty">No patients in queue</div>
 					)}
-				</ul>
+				</div>
 			</motion.div>
 
 		</div>

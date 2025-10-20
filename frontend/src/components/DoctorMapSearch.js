@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Search, MapPin, Phone, Star, Navigation, Clock, Stethoscope, Filter, List } from 'lucide-react';
 import { toast } from 'sonner';
+import '../pages/PatientDashboard.css';
 
 function DoctorMapSearch() {
     const [searchQuery, setSearchQuery] = useState('');
@@ -224,7 +225,7 @@ function DoctorMapSearch() {
 
 
     return (
-        <div className="card">
+        <div className="card doctor-map-search-card">
             <div className="card-header">
                 <h2 className="card-title">Find Nearby Healthcare Facilities</h2>
                 <MapPin size={20} color="#0f766e" />
@@ -273,39 +274,25 @@ function DoctorMapSearch() {
 
 
             {/* Google Maps Iframe */}
-                <div 
-                    style={{ 
-                        width: '100%', 
-                        height: '500px', 
-                        borderRadius: '8px',
-                        marginBottom: 16,
-                        border: '1px solid #e5e7eb',
-                        overflow: 'hidden',
-                        position: 'relative'
-                    }}
-                >
-                    <iframe 
-                        src="https://www.google.com/maps/d/embed?mid=1-zFwjsC3nnQqB2JswXkxVL9tMZBFz2o&ehbc=2E312F" 
-                        width="100%" 
-                        height="100%"
-                        style={{ border: 0 }}
-                        allowFullScreen=""
-                        loading="lazy"
-                        referrerPolicy="no-referrer-when-downgrade"
-                        title="Healthcare Facilities Map"
-                    />
-                </div>
+            <div className="doctor-map-frame">
+                <iframe 
+                    src="https://www.google.com/maps/d/embed?mid=1-zFwjsC3nnQqB2JswXkxVL9tMZBFz2o&ehbc=2E312F" 
+                    width="100%" 
+                    height="100%"
+                    style={{ border: 0 }}
+                    allowFullScreen=""
+                    loading="lazy"
+                    referrerPolicy="no-referrer-when-downgrade"
+                    title="Healthcare Facilities Map"
+                />
+            </div>
 
 
 
             {/* No Results */}
             {filteredDoctors.length === 0 && searchQuery && !loading && (
-                <div style={{ 
-                    textAlign: 'center', 
-                    padding: '32px 16px',
-                    color: '#6b7280'
-                }}>
-                    <Search size={48} style={{ opacity: 0.5, marginBottom: 16 }} />
+                <div className="doctor-map-no-results">
+                    <Search size={48} />
                     <p>No healthcare facilities found for "{searchQuery}"</p>
                     <p style={{ fontSize: '14px', marginTop: 8 }}>
                         Try searching for different hospital names, specialties, or locations

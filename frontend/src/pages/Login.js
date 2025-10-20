@@ -1,18 +1,16 @@
 import React, { useState, useEffect } from "react";
 import API from "../api";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { LogIn } from "lucide-react";
+import { LogIn, Activity, Heart } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
-import { roleBasedStorage } from "../utils/roleBasedStorage";
+import "../auth-pages.css";
 
 function Login() {
     const navigate = useNavigate();
     const { login, isAuthenticated, user, isInitializing } = useAuth();
     const [form, setForm] = useState({ email: "", password: "" });
     const [msg, setMsg] = useState("");
-    const dashboardType = roleBasedStorage.getDashboardType();
-    const port = window.location.port;
 
     // Redirect already authenticated users
     useEffect(() => {
@@ -77,55 +75,79 @@ function Login() {
     };
 
     return (
-        <div className="container-responsive" style={{ paddingTop: 40, paddingBottom: 40 }}>
-            <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="card" style={{ maxWidth: 520, margin: "0 auto" }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-                    <h2 className="page-title" style={{ fontSize: 20, margin: 0 }}>Login</h2>
-                    {process.env.NODE_ENV === 'development' && (
-                        <span style={{ 
-                            fontSize: 12, 
-                            background: dashboardType === 'patient' ? '#3b82f6' : dashboardType === 'doctor' ? '#10b981' : '#f59e0b',
-                            color: 'white',
-                            padding: '2px 6px',
-                            borderRadius: '4px',
-                            fontWeight: 'bold',
-                            display: 'none'
-                        }}>
-                            {dashboardType.toUpperCase()} ::{port}
-                        </span>
-                    )}
+        <div className="auth-container">
+            {/* Left side with branding and illustration */}
+            <motion.div 
+                className="auth-left"
+                initial={{ opacity: 0, x: -50 }} 
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.6 }}
+            >
+                <div className="auth-brand">
+                    <div className="auth-illustration">
+                        <Activity size={80} />
+                    </div>
+                    <h1>CureQueue</h1>
+                    <p>Healthcare Queue Management System</p>
                 </div>
-                <p className="page-subtitle">Welcome back to the {dashboardType} dashboard. Enter your credentials to continue.</p>
-                <form onSubmit={handleSubmit} style={{ marginTop: 16 }}>
-                    <div className="form-field">
-                        <label className="label">Email</label>
-                        <input
-                            className="input"
-                            name="email"
-                            placeholder="you@example.com"
-                            value={form.email}
-                            onChange={handleChange}
-                            required
-                        />
+            </motion.div>
+
+            {/* Right side with login form */}
+            <motion.div 
+                className="auth-right"
+                initial={{ opacity: 0, x: 50 }} 
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.6, delay: 0.1 }}
+            >
+                <div className="auth-card">
+                    <div className="auth-header">
+                        <h2>Sign In</h2>
+                        <p>Welcome back to CureQueue</p>
                     </div>
-                    <div className="form-field">
-                        <label className="label">Password</label>
-                        <input
-                            className="input"
-                            name="password"
-                            type="password"
-                            placeholder="••••••••"
-                            value={form.password}
-                            onChange={handleChange}
-                            required
-                        />
+
+                    <form onSubmit={handleSubmit} className="auth-form">
+                        <div className="auth-form-field">
+                            <label className="auth-form-label">Email</label>
+                            <input
+                                className="auth-form-input"
+                                name="email"
+                                type="email"
+                                placeholder="Enter your email address"
+                                value={form.email}
+                                onChange={handleChange}
+                                required
+                            />
+                        </div>
+                        
+                        <div className="auth-form-field">
+                            <label className="auth-form-label">Password</label>
+                            <input
+                                className="auth-form-input"
+                                name="password"
+                                type="password"
+                                placeholder="Enter your password"
+                                value={form.password}
+                                onChange={handleChange}
+                                required
+                            />
+                        </div>
+
+                        <button type="submit" className="auth-submit-btn">
+                            <LogIn size={16} />
+                            Sign In
+                        </button>
+                    </form>
+
+                    {msg && (
+                        <div className={`auth-message ${msg.includes('successful') ? 'success' : 'error'}`}>
+                            {msg}
+                        </div>
+                    )}
+
+                    <div className="auth-footer">
+                        <p>Don't have an account? <Link to="/register">Sign up here</Link></p>
                     </div>
-                    <button type="submit" className="btn btn-primary btn-block" style={{ marginTop: 12 }}>
-                        <LogIn size={16} />
-                        Login
-                    </button>
-                </form>
-                {msg && <p className="text-muted" style={{ marginTop: 12 }}>{msg}</p>}
+                </div>
             </motion.div>
         </div>
     );

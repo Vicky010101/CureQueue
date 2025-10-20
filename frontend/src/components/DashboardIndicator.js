@@ -2,35 +2,10 @@ import React from 'react';
 import { roleBasedStorage } from '../utils/roleBasedStorage';
 
 function DashboardIndicator() {
-  const dashboardType = roleBasedStorage.getDashboardType();
-  const port = window.location.port;
+  // Dashboard indicator permanently disabled
+  return null;
   
-  const getIndicatorColor = (type) => {
-    switch (type) {
-      case 'patient':
-        return '#3b82f6'; // Blue
-      case 'doctor':
-        return '#10b981'; // Green
-      case 'manager':
-        return '#10b981'; // Green (same as doctor)
-      default:
-        return '#6b7280'; // Gray
-    }
-  };
-
-  const getDashboardLabel = (type) => {
-    switch (type) {
-      case 'patient':
-        return 'Patient Dashboard';
-      case 'doctor':
-        return 'Doctor Dashboard';
-      case 'manager':
-        return 'Doctor Dashboard';
-      default:
-        return 'Unknown Dashboard';
-    }
-  };
-
+  /* Keeping original code commented out
   if (process.env.NODE_ENV !== 'development') {
     return null; // Only show in development
   }
@@ -54,6 +29,7 @@ function DashboardIndicator() {
       {getDashboardLabel(dashboardType)} ::{port}
     </div>
   );
+  */
 }
 
 export default DashboardIndicator;

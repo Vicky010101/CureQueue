@@ -1,7 +1,9 @@
 import React, { useState } from "react";
 import API from "../api";
+import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { UserPlus } from "lucide-react";
+import { UserPlus, Heart, Stethoscope } from "lucide-react";
+import "../auth-pages.css";
 
 function Register() {
     const [form, setForm] = useState({ name: "", email: "", password: "", phone: "", role: "patient" });
@@ -72,86 +74,137 @@ function Register() {
     };
 
     return (
-        <div className="container-responsive" style={{ paddingTop: 40, paddingBottom: 40 }}>
-            <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="card" style={{ maxWidth: 520, margin: "0 auto" }}>
-                <h2 className="page-title" style={{ fontSize: 20 }}>Create an account</h2>
-                <p className="page-subtitle">Join CureQueue to manage your appointments easily.</p>
-                <form onSubmit={handleSubmit} style={{ marginTop: 16 }}>
-                    <div className="form-field">
-                        <label className="label">Name *</label>
-                        <input 
-                            className="input" 
-                            name="name" 
-                            placeholder="Full name" 
-                            value={form.name}
-                            onChange={handleChange} 
-                            required
-                            disabled={isSubmitting}
-                        />
+        <div className="auth-container">
+            {/* Left side with branding and illustration */}
+            <motion.div 
+                className="auth-left"
+                initial={{ opacity: 0, x: -50 }} 
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.6 }}
+            >
+                <div className="auth-brand">
+                    <div className="auth-illustration">
+                        <Heart size={80} />
                     </div>
-                    <div className="form-field">
-                        <label className="label">Email *</label>
-                        <input 
-                            className="input" 
-                            name="email" 
-                            type="email"
-                            placeholder="you@example.com" 
-                            value={form.email}
-                            onChange={handleChange}
-                            required
-                            disabled={isSubmitting}
-                        />
+                    <h1>CureQueue</h1>
+                    <p>Join our healthcare community</p>
+                </div>
+            </motion.div>
+
+            {/* Right side with registration form */}
+            <motion.div 
+                className="auth-right"
+                initial={{ opacity: 0, x: 50 }} 
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.6, delay: 0.1 }}
+            >
+                <div className="auth-card">
+                    <div className="auth-header">
+                        <h2>Create Account</h2>
+                        <p>Join CureQueue to manage your healthcare appointments easily</p>
                     </div>
-                    <div className="form-field">
-                        <label className="label">Phone</label>
-                        <input 
-                            className="input" 
-                            name="phone" 
-                            placeholder="Phone number" 
-                            value={form.phone}
-                            onChange={handleChange}
-                            disabled={isSubmitting}
-                        />
-                    </div>
-                    <div className="form-field">
-                        <label className="label">Password * (min 6 characters)</label>
-                        <input 
-                            className="input" 
-                            name="password" 
-                            type="password" 
-                            placeholder="••••••••" 
-                            value={form.password}
-                            onChange={handleChange}
-                            required
-                            minLength={6}
-                            disabled={isSubmitting}
-                        />
-                    </div>
-                    <div className="form-field">
-                        <label className="label">Role *</label>
-                        <select 
-                            className="input" 
-                            name="role" 
-                            value={form.role} 
-                            onChange={handleChange}
-                            required
+
+                    <form onSubmit={handleSubmit} className="auth-form">
+                        <div className="auth-form-field">
+                            <label className="auth-form-label">Full Name *</label>
+                            <input 
+                                className="auth-form-input" 
+                                name="name" 
+                                type="text"
+                                placeholder="Enter your full name" 
+                                value={form.name}
+                                onChange={handleChange} 
+                                required
+                                disabled={isSubmitting}
+                            />
+                        </div>
+                        
+                        <div className="auth-form-field">
+                            <label className="auth-form-label">Email Address *</label>
+                            <input 
+                                className="auth-form-input" 
+                                name="email" 
+                                type="email"
+                                placeholder="Enter your email address" 
+                                value={form.email}
+                                onChange={handleChange}
+                                required
+                                disabled={isSubmitting}
+                            />
+                        </div>
+                        
+                        <div className="auth-form-field">
+                            <label className="auth-form-label">Phone Number</label>
+                            <input 
+                                className="auth-form-input" 
+                                name="phone" 
+                                type="tel"
+                                placeholder="Enter your phone number" 
+                                value={form.phone}
+                                onChange={handleChange}
+                                disabled={isSubmitting}
+                            />
+                        </div>
+                        
+                        <div className="auth-form-field">
+                            <label className="auth-form-label">Password * (min 6 characters)</label>
+                            <input 
+                                className="auth-form-input" 
+                                name="password" 
+                                type="password" 
+                                placeholder="Create a secure password" 
+                                value={form.password}
+                                onChange={handleChange}
+                                required
+                                minLength={6}
+                                disabled={isSubmitting}
+                            />
+                        </div>
+                        
+                        <div className="auth-form-field">
+                            <label className="auth-form-label">Account Type *</label>
+                            <select 
+                                className="auth-form-select" 
+                                name="role" 
+                                value={form.role} 
+                                onChange={handleChange}
+                                required
+                                disabled={isSubmitting}
+                            >
+                                <option value="patient">Patient</option>
+                                <option value="doctor">Healthcare Provider</option>
+                            </select>
+                        </div>
+
+                        <button 
+                            type="submit" 
+                            className="auth-submit-btn"
                             disabled={isSubmitting}
                         >
-                            <option value="patient">Patient</option>
-                            <option value="doctor">Doctor</option>
-                        </select>
+                            {isSubmitting ? (
+                                <div className="auth-loading">
+                                    <div className="auth-spinner"></div>
+                                    Creating Account...
+                                </div>
+                            ) : (
+                                <>
+                                    <UserPlus size={16} />
+                                    Create Account
+                                </>
+                            )}
+                        </button>
+                    </form>
+
+                    {msg && (
+                        <div className={`auth-message ${msg.includes('successful') || msg.includes('Please login') ? 'success' : 'error'}`}>
+                            {msg}
+                        </div>
+                    )}
+
+                    <div className="auth-footer">
+                        <p>Already have an account? <Link to="/login">Sign in here</Link></p>
                     </div>
-                    <button 
-                        type="submit" 
-                        className="btn btn-primary btn-block" 
-                        style={{ marginTop: 12 }}
-                        disabled={isSubmitting}
-                    >
-                        <UserPlus size={16} />
-                        {isSubmitting ? 'Registering...' : 'Register'}
-                    </button>
-                </form>
-                {msg && <p className="text-muted" style={{ marginTop: 12 }}>{msg}</p>}
+                </div>
             </motion.div>
         </div>
     );

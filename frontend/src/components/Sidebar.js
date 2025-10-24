@@ -12,28 +12,34 @@ function Sidebar({ isOpen, onClose }) {
 					<LayoutDashboard size={16} />
 					Dashboard
 				</NavLink>
-				<NavLink to="/search" className={({ isActive }) => `sidebar-link ${isActive ? "active" : ""}`} onClick={onClose}>
-					<Search size={16} />
-					Search
-				</NavLink>
+				{user?.role !== "doctor" && (
+					<NavLink to="/search" className={({ isActive }) => `sidebar-link ${isActive ? "active" : ""}`} onClick={onClose}>
+						<Search size={16} />
+						Search
+					</NavLink>
+				)}
 				{user?.role === "patient" && (
 					<NavLink to="/map" className={({ isActive }) => `sidebar-link ${isActive ? "active" : ""}`} onClick={onClose}>
 						<MapPin size={16} />
 						Find Doctors
 					</NavLink>
 				)}
-			<NavLink to="/book" className={({ isActive }) => `sidebar-link ${isActive ? "active" : ""}`} onClick={onClose}>
-				<BookOpenText size={16} />
-				Book
-			</NavLink>
+				{user?.role !== "doctor" && (
+					<NavLink to="/book" className={({ isActive }) => `sidebar-link ${isActive ? "active" : ""}`} onClick={onClose}>
+						<BookOpenText size={16} />
+						Book
+					</NavLink>
+				)}
 			<NavLink to="/profile" className={({ isActive }) => `sidebar-link ${isActive ? "active" : ""}`} onClick={onClose}>
 					<User size={16} />
 					Profile
 				</NavLink>
-				<NavLink to="/appointments" className={({ isActive }) => `sidebar-link ${isActive ? "active" : ""}`} onClick={onClose}>
-					<CalendarDays size={16} />
-					Appointments
-				</NavLink>
+				{user?.role !== "doctor" && (
+					<NavLink to="/appointments" className={({ isActive }) => `sidebar-link ${isActive ? "active" : ""}`} onClick={onClose}>
+						<CalendarDays size={16} />
+						Appointments
+					</NavLink>
+				)}
 				{user?.role === "doctor" && (
 					<NavLink to="/doctor/reviews" className={({ isActive }) => `sidebar-link ${isActive ? "active" : ""}`} onClick={onClose}>
 						<Star size={16} />

@@ -2,9 +2,10 @@ import React, { useEffect, useState, useMemo } from "react";
 import API from "../api";
 import { motion } from "framer-motion";
 import './DoctorDashboard.css';
-import { ClipboardList, CalendarDays, X, User, Clock, FileText, CheckCircle, History, AlertCircle, Pencil, XCircle, Search, UserPlus, Phone } from "lucide-react";
+import { ClipboardList, CalendarDays, X, User, Clock, FileText, CheckCircle, History, AlertCircle, Pencil, XCircle, Search, UserPlus, Phone, Home } from "lucide-react";
 import { toast } from "sonner";
 import { queueBus } from "../lib/eventBus";
+import HomeVisitRequests from "../components/HomeVisitRequests";
 
 function DoctorDashboard() {
 	const [todayAppointments, setTodayAppointments] = useState([]);
@@ -802,6 +803,13 @@ function DoctorDashboard() {
 					)}
 				</div>
 			</motion.div>
+
+			{/* Home Visit Requests Section */}
+			{me && (
+				<motion.div layout>
+					<HomeVisitRequests doctorId={me._id} />
+				</motion.div>
+			)}
 
 		</div>
 	);

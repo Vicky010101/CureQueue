@@ -1,165 +1,260 @@
-import React, { useState } from "react";
-import { Home, Send, Clock, CheckCircle, XCircle } from "lucide-react";
+import React, { useEffect, useMemo, useState } from "react";
+import { Home, CheckCircle2, MapPin } from "lucide-react";
 import { toast } from "sonner";
 import API from "../api";
+import '../pages/PatientDashboard.css';
+
+function useDoctors() {
+  const [doctors, setDoctors] = useState([]);
+  useEffect(() => {
+    let active = true;
+    (async () => {
+      try {
+        const res = await API.get('/doctor/ratings');
+        if (!active) return;
+        setDoctors((res.data.doctors || []).map(d => ({ 
+          id: d._id, 
+          name: d.name, 
+          specialty: d.email,
+          averageRating: d.averageRating,
+          totalReviews: d.totalReviews
+        })));
+      } catch (_) {}
+    })();
+    return () => { active = false; };
+  }, []);
+  return doctors;
+}
 
 function HomeVisitRequest() {
+	const [date, setDate] = useState("");
+	const doctors = useDoctors();
+	const [doctorId, setDoctorId] = useState("");
+	const [reason, setReason] = useState("");
 	const [address, setAddress] = useState("");
-	const [preferredTime, setPreferredTime] = useState("");
-	const [notes, setNotes] = useState("");
+	const [location, setLocation] = useState({ latitude: null, longitude: null });
 	const [loading, setLoading] = useState(false);
-	const [requestStatus, setRequestStatus] = useState(null);
+	const [gettingLocation, setGettingLocation] = useState(false);
+	const [requestSuccess, setRequestSuccess] = useState(null);
 
-	const submit = async (e) => {
-		e.preventDefault();
-		if (!address.trim()) {
-			toast.error("Please enter your address");
+	const selectedDoctor = useMemo(() => doctors.find(d => d.id === doctorId), [doctorId, doctors]);
+
+	const getLocation = () => {
+		if (!navigator.geolocation) {
+			toast.error("Geolocation is not supported by your browser");
 			return;
 		}
 
+		setGettingLocation(true);
+		navigator.geolocation.getCurrentPosition(
+			(position) => {
+				setLocation({
+					latitude: position.coords.latitude,
+					longitude: position.coords.longitude
+				});
+				toast.success("Location detected successfully");
+				setGettingLocation(false);
+			},
+			(error) => {
+				console.error("Error getting location:", error);
+				toast.error("Failed to get location. Please enable location services.");
+				setGettingLocation(false);
+			}
+		);
+	};
+
+	const submit = async (e) => {
+		e.preventDefault();
+		if (!date) { toast.error("Select date"); return; }
+		if (!doctorId) { toast.error("Select a doctor"); return; }
+		if (!address) { toast.error("Enter address"); return; }
+		if (!reason) { toast.error("Enter reason for visit"); return; }
+		
 		setLoading(true);
 		try {
-			const response = await API.post('/homevisits', {
-				address: address.trim(),
-				preferredTime: preferredTime || null,
-				notes: notes.trim() || null
+			const res = await API.post('/home-visits', { 
+				doctorId, 
+				date, 
+				reason,
+				address,
+				location
 			});
-
-			setRequestStatus({
-				id: response.data.request._id,
-				status: response.data.request.status,
-				etaMinutes: response.data.request.etaMinutes
+			
+			setRequestSuccess({
+				doctor: selectedDoctor?.name,
+				date,
+				address,
+				reason,
+				status: res.data.request.status
 			});
-
-			toast.success("Home visit request submitted successfully!");
+			
+			toast.success(res.data.msg || "Home Visit Request Submitted Successfully");
 			
 			// Reset form
+			setDate("");
+			setDoctorId("");
+			setReason("");
 			setAddress("");
-			setPreferredTime("");
-			setNotes("");
-		} catch (error) {
-			console.error('Error submitting home visit request:', error);
-			toast.error("Failed to submit request. Please try again.");
+			setLocation({ latitude: null, longitude: null });
+		} catch (e) {
+			console.error('Request error:', e);
+			toast.error(e.response?.data?.msg || 'Failed to submit home visit request');
 		} finally {
 			setLoading(false);
 		}
 	};
 
-	const getStatusIcon = (status) => {
-		switch (status) {
-			case 'approved':
-				return <CheckCircle size={16} color="#10b981" />;
-			case 'rejected':
-				return <XCircle size={16} color="#ef4444" />;
-			case 'completed':
-				return <CheckCircle size={16} color="#059669" />;
-			default:
-				return <Clock size={16} color="#f59e0b" />;
-		}
+	const resetForm = () => {
+		setRequestSuccess(null);
+		setDate("");
+		setDoctorId("");
+		setReason("");
+		setAddress("");
+		setLocation({ latitude: null, longitude: null });
 	};
 
-	const getStatusText = (status) => {
-		switch (status) {
-			case 'new':
-				return 'Request Submitted';
-			case 'approved':
-				return 'Request Approved';
-			case 'rejected':
-				return 'Request Rejected';
-			case 'completed':
-				return 'Visit Completed';
-			default:
-				return 'Processing';
-		}
-	};
+	if (requestSuccess) {
+		return (
+			<section className="appointment-section">
+				<div className="card appointment-card patient-card">
+					<div className="card-header patient-card-header">
+						<h3 className="card-title patient-card-title">Request Confirmed!</h3>
+						<CheckCircle2 size={20} color="#10b981" />
+					</div>
+					<div className="patient-booking-success patient-card-body">
+						<div className="patient-booking-success-header">
+							<CheckCircle2 size={16} color="#10b981" />
+							<span className="patient-booking-success-title">Home Visit Request Submitted Successfully</span>
+						</div>
+						<div className="patient-booking-details">
+							<div className="patient-booking-detail"><strong>Doctor:</strong> <span>{requestSuccess.doctor}</span></div>
+							<div className="patient-booking-detail"><strong>Date:</strong> <span>{requestSuccess.date}</span></div>
+							<div className="patient-booking-detail"><strong>Address:</strong> <span>{requestSuccess.address}</span></div>
+							<div className="patient-booking-detail"><strong>Reason:</strong> <span>{requestSuccess.reason}</span></div>
+							<div className="patient-booking-detail"><strong>Status:</strong> <span>{requestSuccess.status}</span></div>
+						</div>
+						<button 
+							className="btn btn-primary patient-btn" 
+							onClick={resetForm}
+						>
+							Submit Another Request
+						</button>
+					</div>
+				</div>
+			</section>
+		);
+	}
 
 	return (
-		<div className="card">
-			<div className="card-header">
-				<h3 className="card-title">Doctor Home Visit</h3>
-				<Home size={20} color="#0f766e" />
-			</div>
-			
-			{requestStatus ? (
-				<div style={{ padding: 16, background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 8 }}>
-					<div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-						{getStatusIcon(requestStatus.status)}
-						<span style={{ fontWeight: 600, color: '#059669' }}>
-							{getStatusText(requestStatus.status)}
-						</span>
-					</div>
-					<p className="text-muted" style={{ fontSize: 14, margin: '4px 0' }}>
-						Request ID: {requestStatus.id}
-					</p>
-					{requestStatus.etaMinutes && (
-						<p className="text-muted" style={{ fontSize: 14, margin: '4px 0' }}>
-							Estimated arrival time: {requestStatus.etaMinutes} minutes
-						</p>
-					)}
-					<button 
-						className="btn btn-sm" 
-						onClick={() => setRequestStatus(null)}
-						style={{ marginTop: 8 }}
-					>
-						Submit Another Request
-					</button>
+		<section className="appointment-section">
+			<div className="card appointment-card patient-card">
+				<div className="card-header patient-card-header">
+					<h3 className="card-title patient-card-title">Doctor Home Visit Request Form</h3>
+					<Home size={20} color="#0f766e" />
 				</div>
-			) : (
-				<form onSubmit={submit} style={{ display: "grid", gap: 12 }}>
-					<div className="form-field">
-						<label className="label">Address *</label>
-						<textarea 
-							className="input" 
-							rows={3} 
-							value={address} 
-							onChange={(e) => setAddress(e.target.value)} 
-							placeholder="Your full address" 
-							required
-						/>
-					</div>
-					<div className="grid grid-2">
+				<div className="patient-card-body">
+					<form onSubmit={submit} className="form-modern form-compact appointment-form">
+						<div className="grid grid-2">
+							<div className="form-field">
+								<label className="label">Date *</label>
+								<input 
+									className="input" 
+									type="date" 
+									value={date} 
+									onChange={(e) => setDate(e.target.value)}
+									min={new Date().toISOString().split('T')[0]}
+									required
+								/>
+							</div>
+							<div className="form-field">
+								<label className="label">Select Doctor *</label>
+								<select 
+									className="input" 
+									value={doctorId} 
+									onChange={(e) => setDoctorId(e.target.value)}
+									required
+								>
+									<option value="">Select doctor</option>
+									{doctors.map((d) => {
+										const fullStars = d.averageRating ? Math.floor(d.averageRating) : 0;
+										const hasHalfStar = d.averageRating && (d.averageRating % 1 >= 0.5);
+										const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
+										const starDisplay = d.averageRating 
+											? `${'★'.repeat(fullStars)}${hasHalfStar ? '⯨' : ''}${'☆'.repeat(emptyStars)} (${d.averageRating.toFixed(1)})`
+											: 'No ratings yet';
+										return (
+											<option key={d.id} value={d.id}>
+												{d.name} {starDisplay}
+											</option>
+										);
+									})}
+								</select>
+							</div>
+						</div>
+						
 						<div className="form-field">
-							<label className="label">Preferred Time</label>
+							<label className="label">Address *</label>
 							<input 
 								className="input" 
-								type="datetime-local" 
-								value={preferredTime} 
-								onChange={(e) => setPreferredTime(e.target.value)} 
+								type="text" 
+								placeholder="Enter your full address" 
+								value={address} 
+								onChange={(e) => setAddress(e.target.value)}
+								required
 							/>
 						</div>
+
 						<div className="form-field">
-							<label className="label">Notes</label>
-							<input 
+							<label className="label">Geolocation</label>
+							<div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+								<button 
+									type="button"
+									className="btn btn-secondary patient-btn" 
+									onClick={getLocation}
+									disabled={gettingLocation}
+									style={{ flex: '0 0 auto', display: 'flex', alignItems: 'center', gap: '6px' }}
+								>
+									<MapPin size={16} />
+									{gettingLocation ? "Getting Location..." : "Use My Location"}
+								</button>
+								{location.latitude && location.longitude && (
+									<span style={{ fontSize: '0.875rem', color: '#10b981' }}>
+										✓ Location detected ({location.latitude.toFixed(4)}, {location.longitude.toFixed(4)})
+									</span>
+								)}
+							</div>
+						</div>
+
+						<div className="form-field">
+							<label className="label">Reason for Visit *</label>
+							<textarea 
 								className="input" 
-								value={notes} 
-								onChange={(e) => setNotes(e.target.value)} 
-								placeholder="Symptoms or special instructions" 
+								rows={3} 
+								placeholder="Brief reason for home visit" 
+								value={reason} 
+								onChange={(e) => setReason(e.target.value)} 
+								required
 							/>
 						</div>
-					</div>
-					<button 
-						className="btn btn-primary" 
-						type="submit" 
-						disabled={loading || !address.trim()}
-					>
-						{loading ? (
-							<>
-								<div className="spinner" style={{ width: 16, height: 16, borderWidth: 2 }}></div>
-								Submitting...
-							</>
-						) : (
-							<>
-								<Send size={16} /> 
-								Submit Request
-							</>
-						)}
-					</button>
-					<p className="text-muted" style={{ fontSize: 12 }}>
-						* Required field. A doctor will be assigned based on availability and location.
-					</p>
-				</form>
-			)}
-		</div>
+
+						<button 
+							className="btn btn-primary patient-btn" 
+							type="submit" 
+							disabled={!date || !doctorId || !address || !reason || loading}
+						>
+							{loading ? (
+								<>
+									<div className="spinner" style={{ width: 16, height: 16, borderWidth: 2 }}></div>
+									Submitting...
+								</>
+							) : (
+								"Submit Request"
+							)}
+						</button>
+					</form>
+				</div>
+			</div>
+		</section>
 	);
 }
 

@@ -900,6 +900,395 @@
   box-shadow: 0 2px 4px rgba(16, 185, 129, 0.2);
 }
 
+/* ================================
+   HOME VISIT REQUESTS - ENHANCED UI/UX
+   ================================ */
+
+/* Main Container with Clean Padding */
+.doctor-card[style*="marginTop: '24px'"] {
+  padding: 24px;
+  border-radius: 12px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05), 0 0 1px rgba(0, 0, 0, 0.1);
+  background: linear-gradient(to bottom, #ffffff 0%, #fafbfc 100%);
+  border: 1px solid #e8ecf0;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.doctor-card[style*="marginTop: '24px'"]:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08), 0 0 2px rgba(0, 0, 0, 0.1);
+  border-color: var(--doctor-primary-light);
+}
+
+/* Header Styling */
+.doctor-card[style*="marginTop: '24px'"] .doctor-card-header {
+  padding: 20px 24px;
+  background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
+  border-bottom: 2px solid #e8ecf0;
+  margin: -24px -24px 24px -24px;
+  border-radius: 12px 12px 0 0;
+}
+
+.doctor-card[style*="marginTop: '24px'"] .doctor-card-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--doctor-text);
+  letter-spacing: -0.02em;
+}
+
+/* Toolbar Spacing */
+.doctor-card[style*="marginTop: '24px'"] .doctor-toolbar {
+  margin: 0 0 20px 0;
+  padding: 16px;
+  background: #f8fafc;
+  border-radius: 10px;
+  border: 1px solid #e8ecf0;
+}
+
+/* Search Input Enhancement */
+.doctor-card[style*="marginTop: '24px'"] .doctor-search-group {
+  padding: 10px 16px;
+  border-radius: 10px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e2e8f0;
+  background: white;
+  transition: all 0.2s ease;
+}
+
+.doctor-card[style*="marginTop: '24px'"] .doctor-search-group:focus-within {
+  border-color: var(--doctor-primary);
+  box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.08);
+}
+
+.doctor-card[style*="marginTop: '24px'"] .doctor-search-input {
+  font-size: 0.9rem;
+  color: var(--doctor-text);
+  min-width: 260px;
+}
+
+/* Filter Buttons Enhancement */
+.doctor-card[style*="marginTop: '24px'"] .doctor-filter-btn {
+  padding: 8px 16px;
+  border-radius: 9999px;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  border: 1px solid #e2e8f0;
+  background: white;
+  color: var(--doctor-text-muted);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+}
+
+.doctor-card[style*="marginTop: '24px'"] .doctor-filter-btn:hover {
+  background: var(--doctor-primary);
+  color: white;
+  border-color: var(--doctor-primary);
+  box-shadow: 0 2px 6px rgba(15, 118, 110, 0.2);
+  transform: translateY(-1px);
+}
+
+.doctor-card[style*="marginTop: '24px'"] .doctor-filter-btn.active {
+  background: var(--doctor-primary);
+  color: white;
+  border-color: var(--doctor-primary);
+  box-shadow: 0 2px 6px rgba(15, 118, 110, 0.2);
+}
+
+/* Table Container */
+.doctor-card[style*="marginTop: '24px'"] .doctor-table {
+  border-collapse: separate;
+  border-spacing: 0 8px;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  margin-top: 8px;
+}
+
+/* Table Header with Professional Look */
+.doctor-card[style*="marginTop: '24px'"] .doctor-table-header {
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  padding: 16px 16px;
+  border-radius: 10px;
+  margin-bottom: 8px;
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: var(--doctor-text);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border: 1px solid #e8ecf0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  display: grid;
+  grid-template-columns: 50px 1fr 1fr 1.5fr 1.2fr 1fr 1.2fr;
+  gap: 12px;
+  align-items: center;
+}
+
+/* Table Rows with Better Spacing and Hover */
+.doctor-card[style*="marginTop: '24px'"] .doctor-table-row {
+  background: white;
+  padding: 16px 16px;
+  border-radius: 10px;
+  margin-bottom: 8px;
+  min-height: 56px;
+  border: 1px solid #e8ecf0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  display: grid;
+  grid-template-columns: 50px 1fr 1fr 1.5fr 1.2fr 1fr 1.2fr;
+  gap: 12px;
+  align-items: center;
+  font-size: 0.875rem;
+}
+
+.doctor-card[style*="marginTop: '24px'"] .doctor-table-row:hover {
+  background: linear-gradient(135deg, #f8fbff 0%, #f0f9ff 100%);
+  border-color: var(--doctor-primary-light);
+  box-shadow: 0 3px 8px rgba(15, 118, 110, 0.08);
+  transform: translateY(-1px);
+}
+
+.doctor-card[style*="marginTop: '24px'"] .doctor-table-row:last-child {
+  margin-bottom: 0;
+}
+
+/* Table Cells with Proper Padding */
+.doctor-card[style*="marginTop: '24px'"] .doctor-table-cell {
+  padding: 0 8px;
+  display: flex;
+  align-items: center;
+  color: var(--doctor-text);
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+/* Serial Number Styling */
+.doctor-card[style*="marginTop: '24px'"] .doctor-table-cell[style*="width: '50px'"] {
+  font-weight: 600;
+  color: var(--doctor-text-muted);
+  justify-content: center;
+  font-size: 0.9rem;
+}
+
+/* Status Badges - Enhanced Pills */
+.doctor-card[style*="marginTop: '24px'"] .badge {
+  padding: 6px 14px;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid transparent;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+
+/* Status Badge Colors - Professional */
+.doctor-card[style*="marginTop: '24px'"] .badge-green,
+.doctor-card[style*="marginTop: '24px'"] .doctor-status-badge.badge-green {
+  background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+  color: #065f46;
+  border-color: #6ee7b7;
+}
+
+.doctor-card[style*="marginTop: '24px'"] .badge-blue,
+.doctor-card[style*="marginTop: '24px'"] .doctor-status-badge.badge-blue {
+  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+  color: #1e40af;
+  border-color: #93c5fd;
+}
+
+.doctor-card[style*="marginTop: '24px'"] .badge-yellow,
+.doctor-card[style*="marginTop: '24px'"] .doctor-status-badge.badge-yellow {
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  color: #92400e;
+  border-color: #fcd34d;
+}
+
+.doctor-card[style*="marginTop: '24px'"] .badge-red,
+.doctor-card[style*="marginTop: '24px'"] .doctor-status-badge.badge-red {
+  background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+  color: #991b1b;
+  border-color: #fca5a5;
+}
+
+.doctor-card[style*="marginTop: '24px'"] .badge-gray,
+.doctor-card[style*="marginTop: '24px'"] .doctor-status-badge.badge-gray {
+  background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+  color: #374151;
+  border-color: #d1d5db;
+}
+
+/* Action Buttons Container */
+.doctor-card[style*="marginTop: '24px'"] .doctor-table-actions {
+  display: flex;
+  gap: 6px;
+  justify-content: flex-end;
+  align-items: center;
+  flex-wrap: nowrap;
+}
+
+/* Action Buttons - Uniform Size */
+.doctor-card[style*="marginTop: '24px'"] .doctor-table-actions .btn,
+.doctor-card[style*="marginTop: '24px'"] .doctor-table-actions button {
+  height: 36px;
+  width: 36px;
+  min-width: 36px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  border: 1px solid;
+}
+
+.doctor-card[style*="marginTop: '24px'"] .doctor-table-actions .btn:hover,
+.doctor-card[style*="marginTop: '24px'"] .doctor-table-actions button:hover {
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
+}
+
+/* Call Button - Green */
+.doctor-card[style*="marginTop: '24px'"] .doctor-btn-call {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  border-color: #059669;
+  color: white;
+}
+
+.doctor-card[style*="marginTop: '24px'"] .doctor-btn-call:hover {
+  background: linear-gradient(135deg, #059669 0%, #047857 100%);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+/* Accept Button - Success Green */
+.doctor-card[style*="marginTop: '24px'"] .doctor-table-actions button[style*="backgroundColor: '#10b981'"] {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+  border-color: #059669 !important;
+}
+
+.doctor-card[style*="marginTop: '24px'"] .doctor-table-actions button[style*="backgroundColor: '#10b981'"]:hover {
+  background: linear-gradient(135deg, #059669 0%, #047857 100%) !important;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25) !important;
+}
+
+/* Reject Button - Danger Red */
+.doctor-card[style*="marginTop: '24px'"] .doctor-btn-danger {
+  background: white;
+  border-color: #ef4444;
+  color: #ef4444;
+}
+
+.doctor-card[style*="marginTop: '24px'"] .doctor-btn-danger:hover {
+  background: #ef4444;
+  color: white;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.25);
+}
+
+/* Complete Button - Outline */
+.doctor-card[style*="marginTop: '24px'"] .doctor-btn-outline {
+  background: white;
+  border-color: #e2e8f0;
+  color: var(--doctor-text-muted);
+}
+
+.doctor-card[style*="marginTop: '24px'"] .doctor-btn-outline:hover {
+  background: var(--doctor-primary);
+  border-color: var(--doctor-primary);
+  color: white;
+  box-shadow: 0 4px 12px rgba(15, 118, 110, 0.25);
+}
+
+/* Map Button Enhancement */
+.doctor-card[style*="marginTop: '24px'"] button[style*="background: '#f3f4f6'"] {
+  background: #f3f4f6 !important;
+  border: 1px solid #e5e7eb !important;
+  border-radius: 6px !important;
+  padding: 4px 8px !important;
+  transition: all 0.2s ease !important;
+}
+
+.doctor-card[style*="marginTop: '24px'"] button[style*="background: '#f3f4f6'"]:hover {
+  background: var(--doctor-primary) !important;
+  border-color: var(--doctor-primary) !important;
+  box-shadow: 0 2px 6px rgba(15, 118, 110, 0.2) !important;
+}
+
+.doctor-card[style*="marginTop: '24px'"] button[style*="background: '#f3f4f6'"]:hover svg {
+  color: white !important;
+}
+
+/* Empty State Styling */
+.doctor-card[style*="marginTop: '24px'"] div[style*="textAlign: 'center'"] {
+  padding: 4rem 2rem;
+  background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
+  border-radius: 10px;
+  border: 2px dashed #e2e8f0;
+}
+
+/* Responsive Adjustments for Home Visit Requests */
+@media (max-width: 1280px) {
+  .doctor-card[style*="marginTop: '24px'"] .doctor-table-header,
+  .doctor-card[style*="marginTop: '24px'"] .doctor-table-row {
+    grid-template-columns: 45px 1fr 0.9fr 1.2fr 1fr 0.8fr 1fr;
+    gap: 8px;
+    font-size: 0.8125rem;
+  }
+}
+
+@media (max-width: 1024px) {
+  .doctor-card[style*="marginTop: '24px'"] .doctor-table-header,
+  .doctor-card[style*="marginTop: '24px'"] .doctor-table-row {
+    grid-template-columns: 40px 1fr 1fr 1fr;
+    gap: 8px;
+  }
+  
+  .doctor-card[style*="marginTop: '24px'"] .doctor-table-cell:nth-child(n+5):not(:last-child) {
+    display: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .doctor-card[style*="marginTop: '24px'"] {
+    padding: 16px;
+  }
+  
+  .doctor-card[style*="marginTop: '24px'"] .doctor-toolbar {
+    flex-direction: column;
+    padding: 12px;
+  }
+  
+  .doctor-card[style*="marginTop: '24px'"] .doctor-search-input {
+    min-width: 100%;
+  }
+  
+  .doctor-card[style*="marginTop: '24px'"] .doctor-table-header,
+  .doctor-card[style*="marginTop: '24px'"] .doctor-table-row {
+    grid-template-columns: 35px 1fr 1fr;
+    gap: 6px;
+    padding: 12px;
+    font-size: 0.75rem;
+  }
+  
+  .doctor-card[style*="marginTop: '24px'"] .doctor-table-cell:nth-child(n+4):not(:last-child) {
+    display: none;
+  }
+  
+  .doctor-card[style*="marginTop: '24px'"] .doctor-table-actions {
+    flex-direction: column;
+    gap: 4px;
+  }
+  
+  .doctor-card[style*="marginTop: '24px'"] .doctor-table-actions .btn,
+  .doctor-card[style*="marginTop: '24px'"] .doctor-table-actions button {
+    height: 32px;
+    width: 32px;
+    min-width: 32px;
+  }
+}
+
 .doctor-btn-call:focus,
 .btn-call:focus {
   outline: 2px solid rgba(16, 185, 129, 0.4);

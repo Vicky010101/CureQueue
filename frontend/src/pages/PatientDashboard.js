@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import API from "../api";
 import { motion } from "framer-motion";
 import './PatientDashboard.css';
-import { CalendarDays, ListChecks, PlusCircle, Search, User, MapPin, Stethoscope, CheckCircle, AlertCircle } from "lucide-react";
+import { CalendarDays, ListChecks, PlusCircle, Search, User, MapPin, Stethoscope, CheckCircle, AlertCircle, Home } from "lucide-react";
 import { toast } from "sonner";
 import QueueStatusCard from "../components/QueueStatusCard";
 import AppointmentBookingForm from "../components/AppointmentBookingForm";
@@ -10,6 +10,8 @@ import DoctorMapSearch from "../components/DoctorMapSearch";
 import FacilityQueueDisplay from "../components/FacilityQueueDisplay";
 import PatientQueueStatus from "../components/PatientQueueStatus";
 import ReviewModal from "../components/ReviewModal";
+import HomeVisitRequest from "../components/HomeVisitRequest";
+import PatientHomeVisitHistory from "../components/PatientHomeVisitHistory";
 import { queueBus } from "../lib/eventBus";
 import { useNavigate } from "react-router-dom";
 
@@ -27,6 +29,7 @@ function PatientDashboard() {
 	const [showReviewModal, setShowReviewModal] = useState(false);
 	const [reviewAppointment, setReviewAppointment] = useState(null);
 	const [reviewedAppointments, setReviewedAppointments] = useState(new Set());
+	const [activeForm, setActiveForm] = useState('clinic'); // 'clinic' or 'home'
 
 	useEffect(() => {
 		let isMounted = true;
@@ -375,10 +378,70 @@ function PatientDashboard() {
 						{showSearchResults && <SearchResults />}
 					</motion.div>
 
-					{/* Book Appointment */}
-					<motion.div layout>
-						<AppointmentBookingForm />
+					{/* Toggle Slider for Clinic Visit / Home Visit */}
+					<motion.div 
+						layout 
+						className="patient-forms-toggle-container"
+						initial={{ opacity: 0, y: -20 }}
+						animate={{ opacity: 1, y: 0 }}
+						transition={{ duration: 0.3 }}
+					>
+						<div className="patient-forms-toggle">
+							<button
+								className={`patient-toggle-btn ${activeForm === 'clinic' ? 'active' : ''}`}
+								onClick={() => setActiveForm('clinic')}
+							>
+								<CalendarDays size={18} />
+								Clinic Visit
+							</button>
+							<button
+								className={`patient-toggle-btn ${activeForm === 'home' ? 'active' : ''}`}
+								onClick={() => setActiveForm('home')}
+							>
+								<Home size={18} />
+								Home Visit
+							</button>
+						</div>
 					</motion.div>
+
+					{/* Forms - Conditionally Rendered Based on Toggle */}
+					<motion.div 
+						layout 
+						className="patient-form-single-container"
+						key={activeForm}
+						initial={{ opacity: 0, x: activeForm === 'clinic' ? -20 : 20 }}
+						animate={{ opacity: 1, x: 0 }}
+						exit={{ opacity: 0, x: activeForm === 'clinic' ? 20 : -20 }}
+						transition={{ duration: 0.3, ease: 'easeInOut' }}
+					>
+						{activeForm === 'clinic' && (
+							<motion.div 
+								layout
+								initial={{ opacity: 0, scale: 0.95 }}
+								animate={{ opacity: 1, scale: 1 }}
+								transition={{ duration: 0.3 }}
+							>
+								<AppointmentBookingForm />
+							</motion.div>
+						)}
+						{activeForm === 'home' && (
+							<motion.div 
+								layout
+								initial={{ opacity: 0, scale: 0.95 }}
+								animate={{ opacity: 1, scale: 1 }}
+								transition={{ duration: 0.3 }}
+							>
+								<HomeVisitRequest />
+							</motion.div>
+						)}
+					</motion.div>
+
+					{/* Home Visit History */}
+					{me && (
+						<motion.div layout>
+							<PatientHomeVisitHistory patientId={me._id} />
+						</motion.div>
+					)}
 
 					{/* Appointments Section */}
 					<motion.div layout className="card patient-card">

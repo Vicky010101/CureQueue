@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import API from "../api";
 import { useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { LogIn, Activity, Heart } from "lucide-react";
+import { LogIn, Activity, Heart, Home } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import "../auth-pages.css";
 
@@ -76,8 +76,14 @@ function Login() {
 
     return (
         <div className="auth-container">
+            {/* Home Button */}
+            <Link to="/" className="auth-home-btn">
+                <Home size={18} />
+                Home
+            </Link>
+            
             {/* Left side with branding and illustration */}
-            <motion.div 
+            <motion.div
                 className="auth-left"
                 initial={{ opacity: 0, x: -50 }} 
                 animate={{ opacity: 1, x: 0 }}

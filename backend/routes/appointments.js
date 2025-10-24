@@ -199,8 +199,10 @@ router.get("/me", auth, async (req, res) => {
 
     const appointmentsWithNames = appts.map(apt => ({
       id: apt._id,
+      _id: apt._id,
       patientName: req.user.name,
       doctorName: apt.doctorId?.name || 'Unknown Doctor',
+      doctorId: apt.doctorId?._id,
       date: apt.date,
       time: apt.time,
       status: apt.status,

@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import API from "../api";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { UserPlus, Heart, Stethoscope } from "lucide-react";
+import { UserPlus, Heart, Stethoscope, Home } from "lucide-react";
 import "../auth-pages.css";
 
 function Register() {
@@ -75,8 +75,14 @@ function Register() {
 
     return (
         <div className="auth-container">
+            {/* Home Button */}
+            <Link to="/" className="auth-home-btn">
+                <Home size={18} />
+                Home
+            </Link>
+            
             {/* Left side with branding and illustration */}
-            <motion.div 
+            <motion.div
                 className="auth-left"
                 initial={{ opacity: 0, x: -50 }} 
                 animate={{ opacity: 1, x: 0 }}

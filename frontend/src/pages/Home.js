@@ -161,7 +161,7 @@ const Home = () => {
   const doctors = [
     {
       id: 1,
-      name: 'Dr. Sarah Johnson',
+      name: 'Dr. Sanjana Patil',
       specialty: 'Cardiologist',
       experience: '15 years',
       rating: 4.9,
@@ -169,7 +169,7 @@ const Home = () => {
     },
     {
       id: 2,
-      name: 'Dr. Michael Chen',
+      name: 'Dr. Rajesh Gavkar',
       specialty: 'Pediatrician',
       experience: '12 years',
       rating: 4.8,
@@ -177,7 +177,7 @@ const Home = () => {
     },
     {
       id: 3,
-      name: 'Dr. Emily Davis',
+      name: 'Dr. Sanika Chougle',
       specialty: 'Dermatologist',
       experience: '10 years',
       rating: 4.9,
@@ -185,7 +185,7 @@ const Home = () => {
     },
     {
       id: 4,
-      name: 'Dr. James Wilson',
+      name: 'Dr. Aditya Kulkarni',
       specialty: 'Orthopedist',
       experience: '18 years',
       rating: 4.7,

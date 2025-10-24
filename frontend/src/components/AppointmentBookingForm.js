@@ -11,14 +11,39 @@ function useDoctors() {
     let active = true;
     (async () => {
       try {
-        const res = await API.get('/facilities/doctors');
+        // Fetch doctors with ratings
+        const res = await API.get('/doctor/ratings');
         if (!active) return;
-        setDoctors((res.data.doctors || []).map(d => ({ id: d._id, name: d.name, specialty: d.specialization || d.email })));
+        setDoctors((res.data.doctors || []).map(d => ({ 
+          id: d._id, 
+          name: d.name, 
+          specialty: d.email,
+          averageRating: d.averageRating,
+          totalReviews: d.totalReviews
+        })));
       } catch (_) {}
     })();
     return () => { active = false; };
   }, []);
   return doctors;
+}
+
+// Helper function to render star rating
+function renderStars(rating) {
+  if (!rating) return 'No ratings yet';
+  
+  const fullStars = Math.floor(rating);
+  const hasHalfStar = rating % 1 >= 0.5;
+  const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
+  
+  return (
+    <span style={{ color: '#fbbf24', fontSize: '0.875rem' }}>
+      {'★'.repeat(fullStars)}
+      {hasHalfStar ? '⯨' : ''}
+      {'☆'.repeat(emptyStars)}
+      <span style={{ color: '#6b7280', marginLeft: '4px' }}>({rating.toFixed(1)})</span>
+    </span>
+  );
 }
 
 function AppointmentBookingForm() {
@@ -137,9 +162,19 @@ function AppointmentBookingForm() {
 									required
 								>
 									<option value="">Select doctor</option>
-									{doctors.map((d) => (
-										<option key={d.id} value={d.id}>{d.name}</option>
-									))}
+									{doctors.map((d) => {
+										const fullStars = d.averageRating ? Math.floor(d.averageRating) : 0;
+										const hasHalfStar = d.averageRating && (d.averageRating % 1 >= 0.5);
+										const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
+										const starDisplay = d.averageRating 
+											? `${'★'.repeat(fullStars)}${hasHalfStar ? '⯨' : ''}${'☆'.repeat(emptyStars)} (${d.averageRating.toFixed(1)})`
+											: 'No ratings yet';
+										return (
+											<option key={d.id} value={d.id}>
+												{d.name} {starDisplay}
+											</option>
+										);
+									})}
 								</select>
 							</div>
 						</div>
@@ -171,9 +206,22 @@ function AppointmentBookingForm() {
 							)}
 						</button>
 						{selectedDoctor && (
-							<p className="text-muted" style={{ marginTop: '12px', fontSize: '0.875rem' }}>
-								Selected: {selectedDoctor.name} — {selectedDoctor.specialty}
-							</p>
+							<div className="selected-doctor-rating">
+								<p className="text-muted" style={{ margin: '0 0 8px 0' }}>
+									Selected: <strong>{selectedDoctor.name}</strong> — {selectedDoctor.specialty}
+								</p>
+								<div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+									<span className="rating-label">Rating:</span>
+									<span className="doctor-rating-stars">
+										{renderStars(selectedDoctor.averageRating)}
+									</span>
+									{selectedDoctor.totalReviews > 0 && (
+										<span className="review-count">
+											({selectedDoctor.totalReviews} {selectedDoctor.totalReviews === 1 ? 'review' : 'reviews'})
+										</span>
+									)}
+								</div>
+							</div>
 						)}
 					</form>
 				</div>

@@ -1,0 +1,251 @@
+/* Doctor Reviews Container */
+.doctor-reviews-container {
+  padding: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Header */
+.doctor-reviews-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.doctor-reviews-header h1 {
+  margin: 0;
+}
+
+.doctor-reviews-header .page-subtitle {
+  margin: 8px 0 0 0;
+  color: #6b7280;
+  font-size: 0.95rem;
+}
+
+/* Stats Section */
+.doctor-reviews-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.doctor-review-stat-card {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  border: 1px solid #e5e7eb;
+}
+
+.stat-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.stat-content {
+  flex: 1;
+}
+
+.stat-value {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #111827;
+  margin: 0;
+  line-height: 1;
+}
+
+.stat-label {
+  font-size: 0.875rem;
+  color: #6b7280;
+  margin: 4px 0 0 0;
+}
+
+/* Reviews Grid */
+.doctor-reviews-grid {
+  display: grid;
+  gap: 16px;
+}
+
+/* Review Card */
+.doctor-review-card {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  border: 1px solid #e5e7eb;
+  transition: all 0.2s;
+}
+
+.doctor-review-card:hover {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  transform: translateY(-2px);
+}
+
+/* Card Header */
+.doctor-review-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.doctor-review-patient-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+}
+
+.doctor-review-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #0f766e, #14b8a6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 600;
+  font-size: 1.125rem;
+  flex-shrink: 0;
+}
+
+.doctor-review-patient-name {
+  margin: 0 0 4px 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #111827;
+}
+
+.doctor-review-rating-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.doctor-review-stars {
+  display: flex;
+  gap: 2px;
+}
+
+.doctor-review-rating-value {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #6b7280;
+}
+
+.doctor-review-date {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.75rem;
+  color: #9ca3af;
+  white-space: nowrap;
+}
+
+/* Card Body */
+.doctor-review-card-body {
+  padding-top: 12px;
+  border-top: 1px solid #f3f4f6;
+}
+
+.doctor-review-comment {
+  margin: 0;
+  color: #374151;
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  font-style: italic;
+}
+
+/* Empty State */
+.doctor-reviews-empty {
+  text-align: center;
+  padding: 60px 20px;
+}
+
+.doctor-reviews-empty svg {
+  margin-bottom: 16px;
+}
+
+.doctor-reviews-empty h3 {
+  margin: 0 0 8px 0;
+  color: #111827;
+  font-size: 1.25rem;
+}
+
+.doctor-reviews-empty p {
+  margin: 0;
+  max-width: 400px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .doctor-reviews-container {
+    padding: 16px;
+  }
+
+  .doctor-reviews-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .doctor-review-stat-card {
+    padding: 16px;
+  }
+
+  .stat-icon {
+    width: 48px;
+    height: 48px;
+  }
+
+  .stat-value {
+    font-size: 1.75rem;
+  }
+
+  .doctor-review-card {
+    padding: 16px;
+  }
+
+  .doctor-review-card-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .doctor-review-date {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .doctor-reviews-empty {
+    padding: 40px 20px;
+  }
+}
+
+/* Animation */
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.doctor-review-card {
+  animation: slideIn 0.3s ease-out;
+}

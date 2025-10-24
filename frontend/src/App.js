@@ -5,6 +5,7 @@ import Register from "./components/Register";
 import Dashboard from "./components/Dashboard";
 import PatientDashboard from "./pages/PatientDashboard";
 import DoctorDashboard from "./pages/DoctorDashboard";
+import DoctorReviews from "./pages/DoctorReviews";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Navbar from "./components/Navbar";
 import Sidebar from "./components/Sidebar";
@@ -12,7 +13,6 @@ import Footer from "./components/Footer";
 import React from "react";
 import HospitalSearch from "./components/HospitalSearch";
 import AppointmentBookingForm from "./components/AppointmentBookingForm";
-import ReviewsSection from "./components/ReviewsSection";
 import Profile from "./pages/Profile";
 import Appointments from "./pages/Appointments";
 import Settings from "./pages/Settings";
@@ -57,8 +57,7 @@ function AppContent() {
                         <Route path="/dashboard" element={<Dashboard />} />
                       </Route>
                       <Route path="/search" element={<HospitalSearch />} />
-                      <Route path="/reviews" element={<ReviewsSection />} />
-                      <Route element={<ProtectedRoute roles={["patient"]} />}> 
+                      <Route element={<ProtectedRoute roles={["patient"]} />}>
                         <Route path="/book" element={<AppointmentBookingForm />} />
                       </Route>
                       <Route element={<ProtectedRoute roles={["patient", "doctor", "admin"]} />}> 
@@ -72,6 +71,7 @@ function AppContent() {
                       </Route>
                       <Route element={<ProtectedRoute roles={["doctor"]} />}> 
                         <Route path="/doctor-dashboard" element={<DoctorDashboard />} />
+                        <Route path="/doctor/reviews" element={<DoctorReviews />} />
                       </Route>
                     </Routes>
                   </main>

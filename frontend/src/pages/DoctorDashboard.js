@@ -213,7 +213,12 @@ function DoctorDashboard() {
 			// Update legacy state for compatibility
 			updateAppointmentStatus(id, 'completed');
 			toast.success('Appointment marked as completed');
-			queueBus.emit('appointmentUpdated', { _id: id, status: 'completed' });
+			// Emit with doctorId for review modal
+			queueBus.emit('appointmentUpdated', { 
+				_id: id, 
+				status: 'completed',
+				doctorId: me?.id || me?._id
+			});
 		} catch (e) {
 			console.error('Complete error:', e);
 			toast.error('Failed to complete');

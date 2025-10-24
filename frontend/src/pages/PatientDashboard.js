@@ -9,6 +9,7 @@ import AppointmentBookingForm from "../components/AppointmentBookingForm";
 import DoctorMapSearch from "../components/DoctorMapSearch";
 import FacilityQueueDisplay from "../components/FacilityQueueDisplay";
 import PatientQueueStatus from "../components/PatientQueueStatus";
+import ReviewModal from "../components/ReviewModal";
 import { queueBus } from "../lib/eventBus";
 import { useNavigate } from "react-router-dom";
 
@@ -23,6 +24,9 @@ function PatientDashboard() {
 	const [searchResults, setSearchResults] = useState([]);
 	const [showSearchResults, setShowSearchResults] = useState(false);
 	const [activeTab, setActiveTab] = useState('upcoming');
+	const [showReviewModal, setShowReviewModal] = useState(false);
+	const [reviewAppointment, setReviewAppointment] = useState(null);
+	const [reviewedAppointments, setReviewedAppointments] = useState(new Set());
 
 	useEffect(() => {
 		let isMounted = true;
@@ -39,6 +43,7 @@ function PatientDashboard() {
 						date: a.date,
 						time: a.time,
 						doctor: a.doctorName,
+						doctorId: a.doctorId, // Store doctorId for reviews
 						status: a.status,
 						waitingTime: a.waitingTime || 0,
 						reason: a.reason,
@@ -85,6 +90,7 @@ function PatientDashboard() {
 				date: appointment.date,
 				time: appointment.time,
 				doctor: appointment.doctorName,
+				doctorId: appointment.doctorId, // Store doctorId for reviews
 				status: appointment.status,
 				waitingTime: appointment.waitingTime || 0,
 				reason: appointment.reason,
@@ -99,18 +105,33 @@ function PatientDashboard() {
 	// Listen for appointment status updates (completed, cancelled, etc.)
 	React.useEffect(() => {
 		const handleAppointmentUpdate = (updatedAppointment) => {
+			// Trigger review modal when appointment is completed
+			if (updatedAppointment.status === 'completed' && !reviewedAppointments.has(updatedAppointment._id)) {
+				const completedApt = appointments.find(a => a.id === updatedAppointment._id);
+				if (completedApt) {
+					const doctorIdToUse = updatedAppointment.doctorId || completedApt.doctorId;
+					setReviewAppointment({
+						...completedApt,
+						_id: updatedAppointment._id,
+						doctorId: doctorIdToUse
+					});
+					setShowReviewModal(true);
+				}
+			}
+			
 			// Update the appointment in the local state
 			setAppointments(prev => prev.map(apt => 
 				apt.id === updatedAppointment._id ? {
 					...apt,
-					status: updatedAppointment.status
+					status: updatedAppointment.status,
+					doctorId: updatedAppointment.doctorId || apt.doctorId
 				} : apt
 			));
 		};
 
 		const unsubscribe = queueBus.subscribe('appointmentUpdated', handleAppointmentUpdate);
 		return () => unsubscribe();
-	}, []);
+	}, [appointments, reviewedAppointments]);
 
 	const handleSearch = async () => {
 		if (!searchQuery.trim()) {
@@ -146,6 +167,31 @@ function PatientDashboard() {
 			console.error('Cancel appointment error:', error);
 			toast.error('Failed to cancel appointment');
 		}
+	};
+
+	const handleReviewModalClose = (wasSubmitted) => {
+		setShowReviewModal(false);
+		if (wasSubmitted && reviewAppointment) {
+			// Mark appointment as reviewed to prevent showing modal again
+			setReviewedAppointments(prev => new Set([...prev, reviewAppointment._id || reviewAppointment.id]));
+		}
+		setReviewAppointment(null);
+	};
+
+	const handleReviewClick = (appointment) => {
+		// Check if already reviewed
+		if (reviewedAppointments.has(appointment.id)) {
+			toast.info('You have already reviewed this appointment');
+			return;
+		}
+
+		// Set the appointment for review and show modal
+		setReviewAppointment({
+			...appointment,
+			_id: appointment.id,
+			doctorId: appointment.doctorId
+		});
+		setShowReviewModal(true);
 	};
 
 	const renderAppointmentList = (appointments, emptyMessage) => {
@@ -184,6 +230,16 @@ function PatientDashboard() {
 							disabled={loading}
 						>
 							Cancel
+						</button>
+					)}
+					{a.status === 'completed' && (
+						<button 
+							className="btn btn-primary btn-sm patient-btn"
+							onClick={() => handleReviewClick(a)}
+							disabled={reviewedAppointments.has(a.id)}
+							style={{ marginLeft: '8px' }}
+						>
+							{reviewedAppointments.has(a.id) ? '✓ Reviewed' : '⭐ Review'}
 						</button>
 					)}
 				</div>
@@ -414,6 +470,14 @@ function PatientDashboard() {
 					</div>
 				</>
 			)}
+
+			{/* Review Modal */}
+			<ReviewModal
+				isOpen={showReviewModal}
+				onClose={handleReviewModalClose}
+				appointment={reviewAppointment}
+				doctorName={reviewAppointment?.doctor}
+			/>
 		</div>
 	);
 }

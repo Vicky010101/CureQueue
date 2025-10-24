@@ -1,6 +1,6 @@
 import React from "react";
 import { NavLink } from "react-router-dom";
-import { LayoutDashboard, User, CalendarDays, Settings, Search, BookOpenText, Star, MapPin, Users } from "lucide-react";
+import { LayoutDashboard, User, CalendarDays, Settings, Search, BookOpenText, MapPin, Users, Star } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 
 function Sidebar({ isOpen, onClose }) {
@@ -22,15 +22,11 @@ function Sidebar({ isOpen, onClose }) {
 						Find Doctors
 					</NavLink>
 				)}
-				<NavLink to="/book" className={({ isActive }) => `sidebar-link ${isActive ? "active" : ""}`} onClick={onClose}>
-					<BookOpenText size={16} />
-					Book
-				</NavLink>
-				<NavLink to="/reviews" className={({ isActive }) => `sidebar-link ${isActive ? "active" : ""}`} onClick={onClose}>
-					<Star size={16} />
-					Reviews
-				</NavLink>
-				<NavLink to="/profile" className={({ isActive }) => `sidebar-link ${isActive ? "active" : ""}`} onClick={onClose}>
+			<NavLink to="/book" className={({ isActive }) => `sidebar-link ${isActive ? "active" : ""}`} onClick={onClose}>
+				<BookOpenText size={16} />
+				Book
+			</NavLink>
+			<NavLink to="/profile" className={({ isActive }) => `sidebar-link ${isActive ? "active" : ""}`} onClick={onClose}>
 					<User size={16} />
 					Profile
 				</NavLink>
@@ -38,6 +34,12 @@ function Sidebar({ isOpen, onClose }) {
 					<CalendarDays size={16} />
 					Appointments
 				</NavLink>
+				{user?.role === "doctor" && (
+					<NavLink to="/doctor/reviews" className={({ isActive }) => `sidebar-link ${isActive ? "active" : ""}`} onClick={onClose}>
+						<Star size={16} />
+						Reviews
+					</NavLink>
+				)}
 				<NavLink to="/settings" className={({ isActive }) => `sidebar-link ${isActive ? "active" : ""}`} onClick={onClose}>
 					<Settings size={16} />
 					Settings

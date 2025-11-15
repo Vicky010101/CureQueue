@@ -13,7 +13,7 @@ function useDoctors() {
     (async () => {
       try {
         // Fetch doctors with ratings
-        const res = await API.get('/doctor/ratings');
+        const res = await API.get('/api/doctor/ratings');
         if (!active) return;
         setDoctors((res.data.doctors || []).map(d => ({ 
           id: d._id, 
@@ -65,7 +65,7 @@ function AppointmentBookingForm() {
 		
 		setLoading(true);
 		try {
-			const res = await API.post('/appointments', { doctorId, date, reason });
+			const res = await API.post('/api/appointments', { doctorId, date, reason });
 			setBookingSuccess({
 				token: res.data.appointment.token,
 				doctor: selectedDoctor?.name,

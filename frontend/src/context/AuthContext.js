@@ -11,58 +11,33 @@ const AUTH_ACTIONS = {
   LOGOUT: 'LOGOUT',
 };
 
-// Auth reducer
+// Reducer
 const authReducer = (state, action) => {
   switch (action.type) {
     case AUTH_ACTIONS.INIT_START:
-      return {
-        ...state,
-        isInitializing: true,
-        isAuthenticated: false,
-        user: null,
-      };
+      return { ...state, isInitializing: true, isAuthenticated: false, user: null };
     case AUTH_ACTIONS.INIT_SUCCESS:
-      return {
-        ...state,
-        isInitializing: false,
-        isAuthenticated: true,
-        user: action.payload.user,
-      };
+      return { ...state, isInitializing: false, isAuthenticated: true, user: action.payload.user };
     case AUTH_ACTIONS.INIT_FAILURE:
-      return {
-        ...state,
-        isInitializing: false,
-        isAuthenticated: false,
-        user: null,
-      };
+      return { ...state, isInitializing: false, isAuthenticated: false, user: null };
     case AUTH_ACTIONS.LOGIN:
-      return {
-        ...state,
-        isAuthenticated: true,
-        user: action.payload.user,
-      };
+      return { ...state, isAuthenticated: true, user: action.payload.user };
     case AUTH_ACTIONS.LOGOUT:
-      return {
-        ...state,
-        isAuthenticated: false,
-        user: null,
-      };
+      return { ...state, isAuthenticated: false, user: null };
     default:
       return state;
   }
 };
 
-// Initial state
 const initialState = {
   isAuthenticated: false,
   user: null,
   isInitializing: true,
 };
 
-// Create context
 const AuthContext = createContext();
 
-// AuthProvider
+// Provider
 export const AuthProvider = ({ children }) => {
   const [state, dispatch] = useReducer(authReducer, initialState);
 
@@ -76,7 +51,7 @@ export const AuthProvider = ({ children }) => {
     const token = roleBasedStorage.getToken();
     const role = roleBasedStorage.getRole();
 
-    console.log(`[Auth] Initializing session:`, { hasToken: !!token, role });
+    console.log(`[Auth] Initializing session`, { hasToken: !!token, role });
 
     if (!token || !role) {
       dispatch({ type: AUTH_ACTIONS.INIT_FAILURE });
@@ -84,11 +59,10 @@ export const AuthProvider = ({ children }) => {
     }
 
     try {
-      // Validate token
+      // 🔥 Correct endpoint — DO NOT prefix /api here
       const res = await API.get("/auth/me");
       const user = res.data.user;
 
-      // Check stored role matches backend user role
       if (user.role !== role) {
         console.log("[Auth] Role mismatch — clearing session");
         roleBasedStorage.clearAll();
@@ -96,13 +70,25 @@ export const AuthProvider = ({ children }) => {
         return;
       }
 
-      console.log(`[Auth] Token verified — Restored session for ${user.name}`);
-      dispatch({
-        type: AUTH_ACTIONS.INIT_SUCCESS,
-        payload: { user }
-      });
+      console.log(`[Auth] Session restored — ${user.name}`);
+      dispatch({ type: AUTH_ACTIONS.INIT_SUCCESS, payload: { user } });
 
     } catch (err) {
+      // Prevent logout on network/CORS failure
+      const status = err.response?.status;
+      const url = err.config?.url ?? "";
+
+      const isAuthRoute =
+        url.includes("/auth/me") ||
+        url.includes("/auth/login") ||
+        url.includes("/auth/register");
+
+      if (!status && isAuthRoute) {
+        console.log("[Auth] Network/CORS issue — NOT logging out");
+        dispatch({ type: AUTH_ACTIONS.INIT_FAILURE });
+        return;
+      }
+
       console.log("[Auth] Token invalid — clearing session");
       roleBasedStorage.clearAll();
       dispatch({ type: AUTH_ACTIONS.INIT_FAILURE });
@@ -115,10 +101,7 @@ export const AuthProvider = ({ children }) => {
     roleBasedStorage.setRole(userData.role);
     roleBasedStorage.setUser(userData);
 
-    dispatch({
-      type: AUTH_ACTIONS.LOGIN,
-      payload: { user: userData }
-    });
+    dispatch({ type: AUTH_ACTIONS.LOGIN, payload: { user: userData } });
   };
 
   const logout = () => {
@@ -141,7 +124,6 @@ export const AuthProvider = ({ children }) => {
   );
 };
 
-// Custom hook
 export const useAuth = () => {
   const ctx = useContext(AuthContext);
   if (!ctx) throw new Error("useAuth must be used within an AuthProvider");

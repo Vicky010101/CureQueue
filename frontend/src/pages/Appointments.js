@@ -14,7 +14,7 @@ function Appointments() {
 
   const loadAppointments = async () => {
     try {
-      const response = await API.get("/appointments/me");
+      const response = await API.get("/api/appointments/me");
       setAppointments(response.data.appointments || []);
     } catch (error) {
       console.error("Error loading appointments:", error);
@@ -135,7 +135,7 @@ function Appointments() {
                 <div style={{ flex: 1 }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
                     {getStatusIcon(appointment.status)}
-                    <h3 style={{ margin: 0 }}>{appointment.doctorName}</h3>
+                    <h3 style={{ margin: 0 }}>{appointment.doctorName || appointment.doctor || "Doctor"}</h3>
                     <span className={`badge ${getStatusColor(appointment.status)}`}>
                       {appointment.status}
                     </span>

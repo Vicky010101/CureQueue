@@ -17,7 +17,8 @@ function FacilityQueueDisplay() {
             setRefreshing(true);
             
             // Fetch facilities with queue data in a single request
-            const facilitiesRes = await API.get('/facilities/with-queues');
+           const facilitiesRes = await API.get('/api/facilities/with-queues');
+
             const facilitiesList = facilitiesRes.data.facilities || [];
             
             // Process facilities with queue data

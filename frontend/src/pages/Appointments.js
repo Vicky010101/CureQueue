@@ -14,7 +14,7 @@ function Appointments() {
 
   const loadAppointments = async () => {
     try {
-      const response = await API.get("/api/appointments/me");
+      const response = await API.get("/appointments/me");
       setAppointments(response.data.appointments || []);
     } catch (error) {
       console.error("Error loading appointments:", error);

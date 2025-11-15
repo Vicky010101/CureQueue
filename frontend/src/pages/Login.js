@@ -40,7 +40,8 @@ function Login() {
         
         try {
             console.log('Attempting login:', { email: form.email, password: '[HIDDEN]' });
-            const res = await API.post("/auth/login", {
+           const res = await API.post("/api/auth/login", {
+
                 email: form.email.trim(),
                 password: form.password
             });

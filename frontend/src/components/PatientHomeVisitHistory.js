@@ -22,7 +22,7 @@ function PatientHomeVisitHistory({ patientId }) {
 	const fetchRequests = async () => {
 		try {
 			setLoading(true);
-			const res = await API.get(`/api/home-visits/patient/${patientId}`);
+			const res = await API.get(`/home-visits/patient/${patientId}`);
 			setRequests(res.data.requests || []);
 		} catch (e) {
 			console.error('Error fetching home visit requests:', e);
@@ -39,7 +39,7 @@ function PatientHomeVisitHistory({ patientId }) {
 
 		try {
 			setCancelling(requestId);
-			const res = await API.put(`/api/home-visits/${requestId}/cancel`);
+			const res = await API.put(`/home-visits/${requestId}/cancel`);
 			toast.success(res.data.msg || 'Home visit request cancelled');
 			// Update local state
 			setRequests(requests.map(req => 

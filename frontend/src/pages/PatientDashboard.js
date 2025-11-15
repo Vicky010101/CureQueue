@@ -35,11 +35,11 @@ function PatientDashboard() {
 		let isMounted = true;
 		(async () => {
 			try {
-				const meRes = await API.get("/auth/me");
+				const meRes = await API.get("/api/auth/me");
 				if (!isMounted) return;
 				setMe(meRes.data.user);
 				try {
-					const aRes = await API.get('/appointments/me');
+					const aRes = await API.get('/api/appointments/me');
 					if (!isMounted) return;
 					setAppointments((aRes.data.appointments || []).map(a => ({
 						id: a.id || a._id,
@@ -144,7 +144,7 @@ function PatientDashboard() {
 		}
 
 		try {
-			const response = await API.get(`/search?q=${encodeURIComponent(searchQuery)}`);
+			const response = await API.get(`/api/search?q=${encodeURIComponent(searchQuery)}`);
 			setSearchResults(response.data.results || []);
 			setShowSearchResults(true);
 		} catch (error) {
@@ -159,7 +159,7 @@ function PatientDashboard() {
 		}
 
 		try {
-			await API.patch(`/appointments/${appointmentId}/cancel`);
+			await API.patch(`/api/appointments/${appointmentId}/cancel`);
 			toast.success('Appointment cancelled successfully');
 			
 			// Update local state

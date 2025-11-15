@@ -21,9 +21,10 @@ import { AuthProvider, useAuth } from "./context/AuthContext";
 import AuthLoading from "./components/AuthLoading";
 import DashboardIndicator from "./components/DashboardIndicator";
 import StorageTest from "./components/StorageTest";
+
 function AppContent() {
   const [sidebarOpen, setSidebarOpen] = React.useState(false);
-  const { isInitializing, isAuthenticated, user } = useAuth();
+  const { isInitializing } = useAuth();
 
   // Show loading screen while validating token
   if (isInitializing) {
@@ -34,53 +35,64 @@ function AppContent() {
     <Router>
       <div className="min-h-screen flex flex-col">
         <DashboardIndicator />
+
         <Routes>
-          {/* Public routes - Home page with its own navbar */}
+          {/* Public Routes */}
           <Route path="/" element={<Home />} />
           <Route path="/home" element={<Home />} />
-          
-          {/* Auth routes - Login and Register with auth styling */}
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
-          
-          {/* Protected routes with app navbar and sidebar */}
-          <Route path="/*" element={
-            <>
-              <Navbar onToggleSidebar={() => setSidebarOpen((v) => !v)} />
-              <div className="flex-1 w-full">
-                <div className="relative">
-                  <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
-                  <main className={`main-shift ${sidebarOpen ? 'sidebar-open' : ''}`}>
-                    <Routes>
 
-                      <Route element={<ProtectedRoute roles={["patient", "doctor", "admin"]} />}> 
-                        <Route path="/dashboard" element={<Dashboard />} />
-                      </Route>
-                      <Route path="/search" element={<HospitalSearch />} />
-                      <Route element={<ProtectedRoute roles={["patient"]} />}>
-                        <Route path="/book" element={<AppointmentBookingForm />} />
-                      </Route>
-                      <Route element={<ProtectedRoute roles={["patient", "doctor", "admin"]} />}> 
-                        <Route path="/profile" element={<Profile />} />
-                        <Route path="/appointments" element={<Appointments />} />
-                        <Route path="/settings" element={<Settings />} />
-                      </Route>
-                      <Route element={<ProtectedRoute roles={["patient"]} />}> 
-                        <Route path="/patient-dashboard" element={<PatientDashboard />} />
-                        <Route path="/map" element={<MapView />} />
-                      </Route>
-                      <Route element={<ProtectedRoute roles={["doctor"]} />}> 
-                        <Route path="/doctor-dashboard" element={<DoctorDashboard />} />
-                        <Route path="/doctor/reviews" element={<DoctorReviews />} />
-                      </Route>
-                    </Routes>
-                  </main>
+          {/* Protected App Layout (Navbar + Sidebar pages) */}
+          <Route
+            path="/*"
+            element={
+              <>
+                <Navbar onToggleSidebar={() => setSidebarOpen((v) => !v)} />
+                <div className="flex-1 w-full">
+                  <div className="relative">
+                    <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+                    <main className={`main-shift ${sidebarOpen ? "sidebar-open" : ""}`}>
+                      {/* All authenticated routes */}
+                      <Routes>
+                        <Route element={<ProtectedRoute roles={["patient", "doctor", "admin"]} />}>
+                          <Route path="/dashboard" element={<Dashboard />} />
+                        </Route>
+
+                        <Route path="/search" element={<HospitalSearch />} />
+
+                        <Route element={<ProtectedRoute roles={["patient"]} />}>
+                          <Route path="/book" element={<AppointmentBookingForm />} />
+                        </Route>
+
+                        <Route element={<ProtectedRoute roles={["patient", "doctor", "admin"]} />}>
+                          <Route path="/profile" element={<Profile />} />
+                          <Route path="/appointments" element={<Appointments />} />
+                          <Route path="/settings" element={<Settings />} />
+                        </Route>
+
+                        <Route element={<ProtectedRoute roles={["patient"]} />}>
+                          <Route path="/patient-dashboard" element={<PatientDashboard />} />
+                          <Route path="/map" element={<MapView />} />
+                        </Route>
+
+                        <Route element={<ProtectedRoute roles={["doctor"]} />}>
+                          <Route path="/doctor-dashboard" element={<DoctorDashboard />} />
+                          <Route path="/doctor/reviews" element={<DoctorReviews />} />
+                        </Route>
+
+                        {/* If no route matches, redirect to dashboard */}
+                        <Route path="*" element={<Navigate to="/dashboard" />} />
+                      </Routes>
+                    </main>
+                  </div>
                 </div>
-              </div>
-              <Footer />
-            </>
-          } />
+                <Footer />
+              </>
+            }
+          />
         </Routes>
+
         <StorageTest />
       </div>
     </Router>

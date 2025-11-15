@@ -8,7 +8,17 @@ console.log("Loaded MONGO_URI:", process.env.MONGO_URI);
 
 const app = express();
 app.use(express.json());
-app.use(cors());
+app.use(
+  cors({
+    origin: [
+      "https://cure-queue-cyan.vercel.app/", // 🔥 replace this with your Vercel live URL
+      "http://localhost:3000" // optional for local testing
+    ],
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    credentials: true
+  })
+);
+
 
 // Connect DB
 const mongoURI = process.env.MONGO_URI || "mongodb://localhost:27017/curequeue";

@@ -25,9 +25,9 @@ API.interceptors.response.use(
 
     // Only log out if core auth routes fail
     const isCriticalAuthEndpoint =
-      url.includes("/api/auth/me") ||
-      url.includes("/api/auth/login") ||
-      url.includes("/api/auth/register");
+      url.includes("/auth/me") ||
+      url.includes("/auth/login") ||
+      url.includes("/auth/register");
 
     if ((status === 401 || status === 403) && isCriticalAuthEndpoint) {
       console.log(`[API] Auth error on ${url}, clearing storage and redirecting`);

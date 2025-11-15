@@ -32,7 +32,7 @@ function DoctorDashboard() {
 	// Load all doctor's appointments function
 	const loadAllAppointments = async () => {
 		try {
-			const res = await API.get('/doctor/appointments');
+			const res = await API.get('/api/doctor/appointments');
 			const appointmentData = res.data.appointments || [];
 			console.log('Raw appointment data from backend:', appointmentData);
 			
@@ -81,7 +81,7 @@ function DoctorDashboard() {
 		let isMounted = true;
 		(async () => {
 			try {
-				const meRes = await API.get("/auth/me");
+				const meRes = await API.get("/api/auth/me");
 				if (!isMounted) return;
 				setMe(meRes.data.user);
 				await loadAllAppointments();
@@ -209,7 +209,7 @@ function DoctorDashboard() {
 	const completeAppointment = async (id) => {
 		if (!window.confirm('Mark this appointment as completed?')) return;
 		try {
-			await API.patch(`/appointments/${id}/complete`);
+			await API.patch(`/api/appointments/${id}/complete`);
 			setAppointments(prev => prev.map(a => a._id === id ? { ...a, status: 'completed' } : a));
 			// Update legacy state for compatibility
 			updateAppointmentStatus(id, 'completed');
@@ -258,7 +258,7 @@ function DoctorDashboard() {
 			});
 			console.log('API call URL:', `/appointments/${id}/cancel`);
 			
-			const response = await API.patch(`/appointments/${id}/cancel`);
+			const response = await API.patch(`/api/appointments/${id}/cancel`);
 			console.log('Cancel response:', response.data);
 			
 			// Update appointments state
@@ -289,7 +289,7 @@ function DoctorDashboard() {
 	const saveEdit = async () => {
 		try {
 			const newWaitingTime = parseInt(editWaiting) || 0;
-			await API.post(`/appointments/${editingId}/waiting-time`, { waitingTime: newWaitingTime });
+			await API.post(`/api/appointments/${editingId}/waiting-time`, { waitingTime: newWaitingTime });
 			
 			// Update local state immediately for instant UI feedback
 			setAppointments(prev => prev.map(a => 
@@ -373,7 +373,7 @@ function DoctorDashboard() {
 			console.log('Sending appointment data:', appointmentData);
 
 			// Call the appointment creation API
-			const response = await API.post('/appointments/offline', appointmentData);
+			const response = await API.post('/api/appointments/offline', appointmentData);
 			const newAppointment = response.data.appointment;
 			
 			console.log('Received new appointment from backend:', newAppointment);

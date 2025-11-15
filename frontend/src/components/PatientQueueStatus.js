@@ -13,7 +13,7 @@ function PatientQueueStatus({ patientId }) {
         
         try {
             setLoading(true);
-            const response = await API.get(`/queue/patient/${patientId}/status`);
+            const response = await API.get(`/api/queue/patient/${patientId}/status`);
             setQueueStatus(response.data);
             setLastUpdated(new Date());
         } catch (error) {

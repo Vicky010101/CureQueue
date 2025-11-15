@@ -11,7 +11,7 @@ function useDoctors() {
     let active = true;
     (async () => {
       try {
-        const res = await API.get('/doctor/ratings');
+        const res = await API.get('/api/doctor/ratings');
         if (!active) return;
         setDoctors((res.data.doctors || []).map(d => ({ 
           id: d._id, 
@@ -125,7 +125,7 @@ function HomeVisitRequest() {
 		
 		setLoading(true);
 		try {
-			const res = await API.post('/home-visits', { 
+			const res = await API.post('/api/home-visits', { 
 				doctorId, 
 				date, 
 				reason,

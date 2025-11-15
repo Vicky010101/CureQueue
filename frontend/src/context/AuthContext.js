@@ -56,17 +56,16 @@ const authReducer = (state, action) => {
 const initialState = {
   isAuthenticated: false,
   user: null,
-  isInitializing: true, // Show loading until we verify token
+  isInitializing: true,
 };
 
 // Create context
 const AuthContext = createContext();
 
-// AuthProvider component
+// AuthProvider
 export const AuthProvider = ({ children }) => {
   const [state, dispatch] = useReducer(authReducer, initialState);
 
-  // Initialize authentication state on app start
   useEffect(() => {
     initializeAuth();
   }, []);
@@ -76,98 +75,77 @@ export const AuthProvider = ({ children }) => {
 
     const token = roleBasedStorage.getToken();
     const role = roleBasedStorage.getRole();
-    const dashboardType = roleBasedStorage.getDashboardType();
 
-    console.log(`[Auth] Initializing ${dashboardType} dashboard:`, { hasToken: !!token, role });
+    console.log(`[Auth] Initializing session:`, { hasToken: !!token, role });
 
     if (!token || !role) {
-      console.log(`[Auth] No stored credentials for ${dashboardType} dashboard`);
       dispatch({ type: AUTH_ACTIONS.INIT_FAILURE });
       return;
     }
 
     try {
-      // Verify token validity with backend
-      const response = await API.get('/auth/me');
-      
-      // Token is valid, restore user session
-      const user = response.data.user;
-      
-      // Verify that the stored role matches the backend user role
+      // Validate token
+      const res = await API.get("/auth/me");
+      const user = res.data.user;
+
+      // Check stored role matches backend user role
       if (user.role !== role) {
-        // Role mismatch, clear storage and logout
-        console.log(`[Auth] Role mismatch for ${dashboardType}: stored=${role}, backend=${user.role}`);
+        console.log("[Auth] Role mismatch — clearing session");
         roleBasedStorage.clearAll();
         dispatch({ type: AUTH_ACTIONS.INIT_FAILURE });
         return;
       }
 
-      // Also verify that the user role matches the dashboard type (optional strict check)
-      const expectedRole = dashboardType === 'manager' ? 'admin' : dashboardType;
-      if (user.role !== expectedRole) {
-        console.log(`[Auth] User role ${user.role} doesn't match ${dashboardType} dashboard`);
-        roleBasedStorage.clearAll();
-        dispatch({ type: AUTH_ACTIONS.INIT_FAILURE });
-        return;
-      }
-
-      console.log(`[Auth] Successfully restored ${dashboardType} session for user:`, user.name);
-      dispatch({ 
-        type: AUTH_ACTIONS.INIT_SUCCESS, 
-        payload: { user } 
+      console.log(`[Auth] Token verified — Restored session for ${user.name}`);
+      dispatch({
+        type: AUTH_ACTIONS.INIT_SUCCESS,
+        payload: { user }
       });
-    } catch (error) {
-      console.log(`[Auth] Token validation failed for ${dashboardType}:`, error.response?.status);
-      
-      // Token is invalid or expired, clear storage
+
+    } catch (err) {
+      console.log("[Auth] Token invalid — clearing session");
       roleBasedStorage.clearAll();
       dispatch({ type: AUTH_ACTIONS.INIT_FAILURE });
     }
   };
 
   const login = (userData, token) => {
-    const dashboardType = roleBasedStorage.getDashboardType();
-    console.log(`[Auth] Logging in to ${dashboardType} dashboard:`, userData.name, userData.role);
-    
+    console.log(`[Auth] Logging in: ${userData.name} (${userData.role})`);
     roleBasedStorage.setToken(token);
     roleBasedStorage.setRole(userData.role);
     roleBasedStorage.setUser(userData);
-    
-    dispatch({ 
-      type: AUTH_ACTIONS.LOGIN, 
-      payload: { user: userData } 
+
+    dispatch({
+      type: AUTH_ACTIONS.LOGIN,
+      payload: { user: userData }
     });
   };
 
   const logout = () => {
-    const dashboardType = roleBasedStorage.getDashboardType();
-    console.log(`[Auth] Logging out from ${dashboardType} dashboard`);
-    
+    console.log("[Auth] Logging out");
     roleBasedStorage.clearAll();
     dispatch({ type: AUTH_ACTIONS.LOGOUT });
   };
 
-  const value = {
-    ...state,
-    login,
-    logout,
-    initializeAuth,
-  };
-
   return (
-    <AuthContext.Provider value={value}>
+    <AuthContext.Provider
+      value={{
+        ...state,
+        login,
+        logout,
+        initializeAuth,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
 };
 
-// Custom hook to use auth context
+// Custom hook
 export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
+  const ctx = useContext(AuthContext);
+  if (!ctx) throw new Error("useAuth must be used within an AuthProvider");
+  return ctx;
 };
 
 export default AuthContext;

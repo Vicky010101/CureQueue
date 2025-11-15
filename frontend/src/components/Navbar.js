@@ -2,14 +2,42 @@ import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Menu, Stethoscope, LogOut, LogIn, UserPlus, LayoutDashboard } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
+import { roleBasedStorage } from "../utils/roleBasedStorage";
 
 function Navbar({ onToggleSidebar }) {
 	const navigate = useNavigate();
 	const { isAuthenticated, user, logout } = useAuth();
 
+	// Determine dashboard route based on role
+	const getDashboardRoute = () => {
+		if (!user) return "/";
+		switch (user.role) {
+			case "doctor":
+				return "/doctor-dashboard";
+			case "admin":
+			case "manager":
+				return "/manager-dashboard";
+			default:
+				return "/patient-dashboard";
+		}
+	};
+
+	// Determine login route based on dashboard type
+	const getLoginRoute = () => {
+		const dashboardType = roleBasedStorage.getDashboardType();
+		switch (dashboardType) {
+			case "doctor":
+				return "/doctor-login";
+			case "manager":
+				return "/admin-login";
+			default:
+				return "/login";
+		}
+	};
+
 	const handleLogout = () => {
 		logout();
-		navigate("/login");
+		navigate(getLoginRoute());
 	};
 
 	return (
@@ -23,7 +51,7 @@ function Navbar({ onToggleSidebar }) {
 					>
 						<Menu size={20} />
 					</button>
-					<Link to={isAuthenticated ? "/dashboard" : "/"} className="brand">
+					<Link to={isAuthenticated ? getDashboardRoute() : "/"} className="brand">
 						<Stethoscope size={24} color="#0f766e" />
 						<span>CureQueue</span>
 					</Link>
@@ -32,10 +60,7 @@ function Navbar({ onToggleSidebar }) {
 				<nav className="navbar-actions">
 					{isAuthenticated ? (
 						<>
-							<Link
-								to={user?.role === "admin" ? "/doctor-dashboard" : user?.role === "doctor" ? "/doctor-dashboard" : "/patient-dashboard"}
-								className="btn"
-							>
+							<Link to={getDashboardRoute()} className="btn">
 								<LayoutDashboard size={16} />
 								Dashboard
 							</Link>
@@ -46,7 +71,7 @@ function Navbar({ onToggleSidebar }) {
 						</>
 					) : (
 						<>
-							<Link to="/login" className="btn">
+							<Link to={getLoginRoute()} className="btn">
 								<LogIn size={16} />
 								Login
 							</Link>
@@ -63,5 +88,3 @@ function Navbar({ onToggleSidebar }) {
 }
 
 export default Navbar;
-
-

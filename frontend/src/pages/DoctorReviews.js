@@ -16,12 +16,12 @@ function DoctorReviews() {
     (async () => {
       try {
         // Get current user info
-        const meRes = await API.get('/api/auth/me');
+        const meRes = await API.get('/auth/me');
         if (!isMounted) return;
         setMe(meRes.data.user);
 
         // Fetch reviews for this doctor
-        const reviewsRes = await API.get(`/api/reviews/doctor/${meRes.data.user._id}`);
+        const reviewsRes = await API.get(`/reviews/doctor/${meRes.data.user._id}`);
         if (!isMounted) return;
         
         const fetchedReviews = reviewsRes.data.reviews || [];

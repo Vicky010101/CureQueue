@@ -40,7 +40,7 @@ function UserManagement() {
 
     const loadUsers = async () => {
         try {
-            const response = await API.get("/auth/users");
+            const response = await API.get("/api/auth/users");
             setUsers(response.data.users || []);
         } catch (error) {
             console.error("Error loading users:", error);
@@ -53,7 +53,7 @@ function UserManagement() {
     const handleAddUser = async (e) => {
         e.preventDefault();
         try {
-            const response = await API.post("/auth/register", newUser);
+            const response = await API.post("/api/auth/register", newUser);
             toast.success("User created successfully");
             setShowAddUser(false);
             setNewUser({ name: "", email: "", phone: "", role: "patient", password: "" });
@@ -79,7 +79,7 @@ function UserManagement() {
     const handleUpdateUser = async (e) => {
         e.preventDefault();
         try {
-            await API.put(`/auth/users/${editingUser._id}`, editingUser);
+            await API.put(`/api/auth/users/${editingUser._id}`, editingUser);
             toast.success("User updated successfully");
             setEditingUser(null);
             loadUsers();
@@ -91,7 +91,7 @@ function UserManagement() {
     const handleDeleteUser = async (userId) => {
         if (window.confirm("Are you sure you want to delete this user?")) {
             try {
-                await API.delete(`/auth/users/${userId}`);
+                await API.delete(`/api/auth/users/${userId}`);
                 toast.success("User deleted successfully");
                 loadUsers();
             } catch (error) {

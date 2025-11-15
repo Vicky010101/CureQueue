@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const HomeVisit = require("../models/HomeVisit");
 const { auth, roleCheck } = require("../middleware/auth");
+const { sendHomeVisitAccepted, sendHomeVisitRejected, sendHomeVisitCompleted } = require("../utils/mailer");
 
 router.post("/", auth, async (req, res) => {
   try {
@@ -21,7 +22,7 @@ router.post("/", auth, async (req, res) => {
       status: "Pending" 
     });
     
-    await hv.populate('patientId', 'name');
+    await hv.populate('patientId', 'name phone');
     res.status(201).json({ request: hv, msg: "Home Visit Request Submitted Successfully" });
   } catch (e) {
     console.error(e);
@@ -49,7 +50,7 @@ router.get("/doctor/:doctorId", auth, async (req, res) => {
     }
     
     const requests = await HomeVisit.find({ doctorId })
-      .populate('patientId', 'name email phone mobile')
+      .populate('patientId', 'name email phone')
       .sort({ date: 1 });
       
     res.json({ requests });
@@ -97,7 +98,31 @@ router.put("/:id/accept", auth, async (req, res) => {
     homeVisit.status = "Accepted";
     await homeVisit.save();
     
-    await homeVisit.populate('patientId', 'name email');
+    // Populate patient and doctor details for email
+    await homeVisit.populate('patientId', 'name email phone');
+    await homeVisit.populate('doctorId', 'name');
+    
+    // Send email notification to patient
+    try {
+      if (homeVisit.patientId && homeVisit.patientId.email) {
+        await sendHomeVisitAccepted({
+          to: homeVisit.patientId.email,
+          patientName: homeVisit.patientId.name,
+          doctorName: homeVisit.doctorId.name,
+          date: new Date(homeVisit.date).toLocaleDateString('en-US', { 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric' 
+          }),
+          address: homeVisit.address
+        });
+        console.log(`✅ Home visit acceptance email sent to ${homeVisit.patientId.email}`);
+      }
+    } catch (emailError) {
+      console.error('❌ Failed to send home visit acceptance email:', emailError);
+      // Don't fail the request if email fails
+    }
+    
     res.json({ request: homeVisit, msg: "Home visit request accepted" });
   } catch (e) {
     console.error(e);
@@ -122,7 +147,31 @@ router.put("/:id/reject", auth, async (req, res) => {
     homeVisit.status = "Rejected";
     await homeVisit.save();
     
-    await homeVisit.populate('patientId', 'name email');
+    // Populate patient and doctor details for email
+    await homeVisit.populate('patientId', 'name email phone');
+    await homeVisit.populate('doctorId', 'name');
+    
+    // Send email notification to patient
+    try {
+      if (homeVisit.patientId && homeVisit.patientId.email) {
+        await sendHomeVisitRejected({
+          to: homeVisit.patientId.email,
+          patientName: homeVisit.patientId.name,
+          doctorName: homeVisit.doctorId.name,
+          date: new Date(homeVisit.date).toLocaleDateString('en-US', { 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric' 
+          }),
+          address: homeVisit.address
+        });
+        console.log(`✅ Home visit rejection email sent to ${homeVisit.patientId.email}`);
+      }
+    } catch (emailError) {
+      console.error('❌ Failed to send home visit rejection email:', emailError);
+      // Don't fail the request if email fails
+    }
+    
     res.json({ request: homeVisit, msg: "Home visit request rejected" });
   } catch (e) {
     console.error(e);
@@ -147,7 +196,31 @@ router.put("/:id/complete", auth, async (req, res) => {
     homeVisit.status = "Completed";
     await homeVisit.save();
     
-    await homeVisit.populate('patientId', 'name email');
+    // Populate patient and doctor details for email
+    await homeVisit.populate('patientId', 'name email phone');
+    await homeVisit.populate('doctorId', 'name');
+    
+    // Send email notification to patient
+    try {
+      if (homeVisit.patientId && homeVisit.patientId.email) {
+        await sendHomeVisitCompleted({
+          to: homeVisit.patientId.email,
+          patientName: homeVisit.patientId.name,
+          doctorName: homeVisit.doctorId.name,
+          date: new Date(homeVisit.date).toLocaleDateString('en-US', { 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric' 
+          }),
+          address: homeVisit.address
+        });
+        console.log(`✅ Home visit completion email sent to ${homeVisit.patientId.email}`);
+      }
+    } catch (emailError) {
+      console.error('❌ Failed to send home visit completion email:', emailError);
+      // Don't fail the request if email fails
+    }
+    
     res.json({ request: homeVisit, msg: "Home visit marked as completed" });
   } catch (e) {
     console.error(e);

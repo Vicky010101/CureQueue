@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import API from "../api";
 import { queueBus } from "../lib/eventBus";
 import '../pages/PatientDashboard.css';
+import './AppointmentBookingForm.css';
 
 function useDoctors() {
   const [doctors, setDoctors] = useState([]);
@@ -99,12 +100,13 @@ function AppointmentBookingForm() {
 
 	if (bookingSuccess) {
 		return (
-			<section className="appointment-section">
-				<div className="card appointment-card patient-card">
-					<div className="card-header patient-card-header">
-						<h3 className="card-title patient-card-title">Booking Confirmed!</h3>
-						<CheckCircle2 size={20} color="#10b981" />
-					</div>
+			<div className="appointment-booking-form-container">
+				<section className="appointment-section">
+					<div className="card appointment-card patient-card">
+						<div className="card-header patient-card-header">
+							<h3 className="card-title patient-card-title">Booking Confirmed!</h3>
+							<CheckCircle2 size={20} color="#ffffff" />
+						</div>
 					<div className="patient-booking-success patient-card-body">
 						<div className="patient-booking-success-header">
 							<CheckCircle2 size={16} color="#10b981" />
@@ -125,20 +127,22 @@ function AppointmentBookingForm() {
 							onClick={resetForm}
 						>
 							Book Another Appointment
-						</button>
-					</div>
+					</button>
 				</div>
-			</section>
+			</div>
+		</section>
+			</div>
 		);
 	}
 
 	return (
-		<section className="appointment-section">
-			<div className="card appointment-card patient-card">
-				<div className="card-header patient-card-header">
-					<h3 className="card-title patient-card-title">Book Appointment</h3>
-					<CalendarDays size={20} color="#0f766e" />
-				</div>
+		<div className="appointment-booking-form-container">
+			<section className="appointment-section">
+				<div className="card appointment-card patient-card">
+					<div className="card-header patient-card-header">
+						<h3 className="card-title patient-card-title">Book Appointment</h3>
+						<CalendarDays size={20} color="#ffffff" />
+					</div>
 				<div className="patient-card-body">
 					<form onSubmit={submit} className="form-modern form-compact appointment-form">
 						<div className="grid grid-2">
@@ -227,6 +231,7 @@ function AppointmentBookingForm() {
 				</div>
 			</div>
 		</section>
+		</div>
 	);
 }
 

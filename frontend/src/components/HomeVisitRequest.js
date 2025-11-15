@@ -3,6 +3,7 @@ import { Home, CheckCircle2, MapPin } from "lucide-react";
 import { toast } from "sonner";
 import API from "../api";
 import '../pages/PatientDashboard.css';
+import './HomeVisitRequest.css';
 
 function useDoctors() {
   const [doctors, setDoctors] = useState([]);
@@ -47,13 +48,65 @@ function HomeVisitRequest() {
 
 		setGettingLocation(true);
 		navigator.geolocation.getCurrentPosition(
-			(position) => {
+			async (position) => {
+				const lat = position.coords.latitude;
+				const lon = position.coords.longitude;
+				
 				setLocation({
-					latitude: position.coords.latitude,
-					longitude: position.coords.longitude
+					latitude: lat,
+					longitude: lon
 				});
-				toast.success("Location detected successfully");
-				setGettingLocation(false);
+				
+				// Fetch address using OpenStreetMap Nominatim reverse geocoding
+				try {
+					const response = await fetch(
+						`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&addressdetails=1`,
+						{
+							headers: {
+								'User-Agent': 'CureQueue-HomeVisit/1.0'
+							}
+						}
+					);
+					
+					if (response.ok) {
+						const data = await response.json();
+						
+						if (data && data.display_name) {
+							// Use display_name for full address or construct from address components
+							const addressComponents = data.address;
+							let formattedAddress = '';
+							
+							if (addressComponents) {
+								// Build a readable address from components
+								const parts = [
+									addressComponents.house_number,
+									addressComponents.road || addressComponents.street,
+									addressComponents.suburb || addressComponents.neighbourhood,
+									addressComponents.city || addressComponents.town || addressComponents.village,
+									addressComponents.state,
+									addressComponents.postcode,
+									addressComponents.country
+								].filter(Boolean);
+								
+								formattedAddress = parts.join(', ');
+							} else {
+								formattedAddress = data.display_name;
+							}
+							
+							setAddress(formattedAddress);
+							toast.success("Location and address detected successfully!");
+						} else {
+							toast.success("Location detected. Please enter address manually.");
+						}
+					} else {
+						toast.warning("Location detected, but address lookup failed. Please enter manually.");
+					}
+				} catch (geocodeError) {
+					console.error("Reverse geocoding error:", geocodeError);
+					toast.warning("Location detected, but address lookup failed. Please enter manually.");
+				} finally {
+					setGettingLocation(false);
+				}
 			},
 			(error) => {
 				console.error("Error getting location:", error);
@@ -115,43 +168,46 @@ function HomeVisitRequest() {
 
 	if (requestSuccess) {
 		return (
-			<section className="appointment-section">
-				<div className="card appointment-card patient-card">
-					<div className="card-header patient-card-header">
-						<h3 className="card-title patient-card-title">Request Confirmed!</h3>
-						<CheckCircle2 size={20} color="#10b981" />
-					</div>
-					<div className="patient-booking-success patient-card-body">
-						<div className="patient-booking-success-header">
-							<CheckCircle2 size={16} color="#10b981" />
-							<span className="patient-booking-success-title">Home Visit Request Submitted Successfully</span>
+			<div className="home-visit-form-container">
+				<section className="appointment-section">
+					<div className="card appointment-card patient-card">
+						<div className="card-header patient-card-header">
+							<h3 className="card-title patient-card-title">Request Confirmed!</h3>
+							<CheckCircle2 size={20} color="#ffffff" />
 						</div>
-						<div className="patient-booking-details">
-							<div className="patient-booking-detail"><strong>Doctor:</strong> <span>{requestSuccess.doctor}</span></div>
-							<div className="patient-booking-detail"><strong>Date:</strong> <span>{requestSuccess.date}</span></div>
-							<div className="patient-booking-detail"><strong>Address:</strong> <span>{requestSuccess.address}</span></div>
-							<div className="patient-booking-detail"><strong>Reason:</strong> <span>{requestSuccess.reason}</span></div>
-							<div className="patient-booking-detail"><strong>Status:</strong> <span>{requestSuccess.status}</span></div>
+						<div className="patient-booking-success patient-card-body">
+							<div className="patient-booking-success-header">
+								<CheckCircle2 size={16} color="#10b981" />
+								<span className="patient-booking-success-title">Home Visit Request Submitted Successfully</span>
+							</div>
+							<div className="patient-booking-details">
+								<div className="patient-booking-detail"><strong>Doctor:</strong> <span>{requestSuccess.doctor}</span></div>
+								<div className="patient-booking-detail"><strong>Date:</strong> <span>{requestSuccess.date}</span></div>
+								<div className="patient-booking-detail"><strong>Address:</strong> <span>{requestSuccess.address}</span></div>
+								<div className="patient-booking-detail"><strong>Reason:</strong> <span>{requestSuccess.reason}</span></div>
+								<div className="patient-booking-detail"><strong>Status:</strong> <span>{requestSuccess.status}</span></div>
+							</div>
+							<button 
+								className="btn btn-primary patient-btn" 
+								onClick={resetForm}
+							>
+								Submit Another Request
+							</button>
 						</div>
-						<button 
-							className="btn btn-primary patient-btn" 
-							onClick={resetForm}
-						>
-							Submit Another Request
-						</button>
 					</div>
-				</div>
-			</section>
+				</section>
+			</div>
 		);
 	}
 
 	return (
-		<section className="appointment-section">
-			<div className="card appointment-card patient-card">
-				<div className="card-header patient-card-header">
-					<h3 className="card-title patient-card-title">Doctor Home Visit Request Form</h3>
-					<Home size={20} color="#0f766e" />
-				</div>
+		<div className="home-visit-form-container">
+			<section className="appointment-section">
+				<div className="card appointment-card patient-card">
+					<div className="card-header patient-card-header">
+						<h3 className="card-title patient-card-title">Doctor Home Visit Request Form</h3>
+						<Home size={20} color="#ffffff" />
+					</div>
 				<div className="patient-card-body">
 					<form onSubmit={submit} className="form-modern form-compact appointment-form">
 						<div className="grid grid-2">
@@ -255,6 +311,7 @@ function HomeVisitRequest() {
 				</div>
 			</div>
 		</section>
+		</div>
 	);
 }
 

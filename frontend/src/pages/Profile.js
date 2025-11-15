@@ -20,7 +20,7 @@ function Profile() {
 
   const loadUserProfile = async () => {
     try {
-      const response = await API.get("/auth/me");
+      const response = await API.get("/api/auth/me");
       setUser(response.data.user);
       setFormData({
         name: response.data.user.name || "",
@@ -52,7 +52,7 @@ function Profile() {
 
   const handleSave = async () => {
     try {
-      const response = await API.put("/auth/profile", formData);
+      const response = await API.put("/api/auth/profile", formData);
       setUser(response.data.user);
       setIsEditing(false);
       toast.success("Profile updated successfully");

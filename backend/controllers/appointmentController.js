@@ -1,6 +1,7 @@
 const Appointment = require("../models/Appointment");
 const User = require("../models/User");
-const nodemailer = require("nodemailer");
+const { Resend } = require("resend");
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 exports.bookAppointment = async (req, res) => {
   try {
@@ -44,7 +45,7 @@ exports.bookAppointment = async (req, res) => {
       date,
       time: istTime,
       reason,
-      status: "Confirmed", // use consistent capital C
+      status: "Confirmed",
       waitingTime
     });
 
@@ -54,35 +55,29 @@ exports.bookAppointment = async (req, res) => {
     const patient = await User.findById(patientId);
     const doctor = await User.findById(doctorId);
 
-    // Email (if credentials exist)
-    if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
-      const transporter = nodemailer.createTransport({
-        service: "gmail",
-        auth: {
-          user: process.env.EMAIL_USER,
-          pass: process.env.EMAIL_PASS
-        },
-      });
-
-      const mailOptions = {
-        from: process.env.EMAIL_USER,
-        to: patient?.email || "",
-        subject: "Appointment Confirmation",
-        text: `Dear ${patient?.name},
-
-Your appointment with Dr. ${doctor?.name} has been booked successfully.
-
-🗓 Date: ${date}
-⏰ Time: ${istTime} (IST)
-⌛ Estimated waiting time: ${waitingTime} minutes
-
-Thank you for choosing CureQueue!`
-      };
-
-      transporter.sendMail(mailOptions).catch(err =>
-        console.error("Email warning:", err.message)
-      );
+    // ------------------ EMAIL USING RESEND ------------------
+    if (process.env.MAIL_SENDER) {
+      try {
+        await resend.emails.send({
+          from: `CureQueue <${process.env.MAIL_SENDER}>`,
+          to: patient?.email || "",
+          subject: "Appointment Confirmation",
+          html: `
+            <p>Dear ${patient?.name},</p>
+            <p>Your appointment with <strong>Dr. ${doctor?.name}</strong> has been booked successfully.</p>
+            <p>🗓 <strong>Date:</strong> ${date}</p>
+            <p>⏰ <strong>Time:</strong> ${istTime} (IST)</p>
+            <p>⌛ <strong>Estimated waiting time:</strong> ${waitingTime} minutes</p>
+            <br>
+            <p>Thank you for choosing <strong>CureQueue</strong> 🩵</p>
+          `
+        });
+        console.log("Resend Email Sent to:", patient?.email);
+      } catch (err) {
+        console.error("Resend email error:", err.response?.data || err);
+      }
     }
+    // ---------------------------------------------------------
 
     res.status(201).json({
       msg: "Appointment booked successfully",

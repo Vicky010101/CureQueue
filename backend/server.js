@@ -5,7 +5,9 @@ const cors = require("cors");
 require("dotenv").config();
 
 console.log("Loaded MONGO_URI:", process.env.MONGO_URI);
-console.log("env has resend:", !!process.env.RESEND_API_KEY);
+const { Resend } = require("resend");
+const resend = new Resend(process.env.RESEND_API_KEY);
+module.exports.resend = resend;
 
 const app = express();
 app.use(express.json());

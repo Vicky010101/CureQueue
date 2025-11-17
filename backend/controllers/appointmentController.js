@@ -1,7 +1,7 @@
 const Appointment = require("../models/Appointment");
 const User = require("../models/User");
-const { Resend } = require("resend");
-const resend = new Resend(process.env.RESEND_API_KEY);
+const { resend } = require("../server");
+
 
 exports.bookAppointment = async (req, res) => {
   try {

@@ -1362,3 +1362,109 @@
     height: 10px;
   }
 }
+/* ==========================================================
+   📱 MOBILE RESPONSIVE — UI IMPROVEMENTS
+   ========================================================== */
+@media (max-width: 768px) {
+  .doctor-dashboard-container {
+    padding: 14px !important;
+  }
+
+  .doctor-card,
+  .doctor-add-form {
+    padding: 18px !important;
+    border-radius: 12px !important;
+  }
+
+  .doctor-toolbar {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 12px !important;
+  }
+
+  .doctor-search-input {
+    width: 100% !important;
+  }
+
+  /* Full width buttons for touchscreen */
+  .doctor-btn,
+  .doctor-btn-lg,
+  .doctor-btn-sm {
+    width: 100% !important;
+    justify-content: center !important;
+  }
+
+  /* Compact table view */
+  .doctor-table-header,
+  .doctor-table-row {
+    grid-template-columns: 1fr 1fr !important;
+    font-size: 0.8rem !important;
+  }
+
+  /* Hide extra columns */
+  .doctor-table-cell:nth-child(n+3) {
+    display: none !important;
+  }
+
+  /* Appointment and queue items stack */
+  .doctor-appointment-item,
+  .doctor-queue-item {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 14px !important;
+  }
+}
+
+/* ==========================================================
+   📱 SMALL PHONES — SUPER RESPONSIVE (<480px)
+   ========================================================== */
+@media (max-width: 480px) {
+  .doctor-header .page-title {
+    font-size: 1.4rem !important;
+  }
+
+  .doctor-card-title {
+    font-size: 1.15rem !important;
+  }
+
+  .doctor-btn {
+    font-size: 0.82rem !important;
+    padding: 9px 14px !important;
+  }
+
+  .doctor-card,
+  .doctor-add-form {
+    padding: 16px !important;
+  }
+}
+
+/* ==========================================================
+   📌 PWA — STANDALONE APP MODE (Add to Home Screen)
+   ========================================================== */
+@media all and (display-mode: standalone) {
+  body {
+    background: #ffffff !important;
+  }
+
+  .doctor-dashboard-container {
+    padding-bottom: 22px !important;
+  }
+
+  /* App-style full-screen cards */
+  .doctor-card,
+  .doctor-add-form {
+    border-radius: 0 !important;
+    width: calc(100% + 10px) !important;
+    margin-left: -5px !important;
+    margin-right: -5px !important;
+    box-shadow: none !important;
+  }
+
+  /* Full-width buttons for installed-app UX */
+  .doctor-btn,
+  .doctor-btn-lg,
+  .doctor-btn-sm {
+    width: 100% !important;
+    justify-content: center !important;
+  }
+}

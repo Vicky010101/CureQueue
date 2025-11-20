@@ -479,3 +479,33 @@
   position: relative;
   z-index: 2;
 }
+
+/* 🌟 Added for Add-to-Home-Screen (PWA) full screen mobile app mode */
+@media all and (display-mode: standalone) {
+  .auth-container {
+    flex-direction: column;
+  }
+
+  .auth-left {
+    height: 160px;
+    padding: 1.5rem;
+  }
+
+  .auth-home-btn {
+    display: none; /* Hide home/navigation button inside installed app */
+  }
+
+  .auth-card {
+    max-width: none;
+    width: 100%;
+    height: 100vh;
+    border-radius: 0;
+    box-shadow: none;
+    padding-top: 3rem;
+  }
+
+  .auth-right {
+    padding: 0;
+    justify-content: flex-start;
+  }
+}

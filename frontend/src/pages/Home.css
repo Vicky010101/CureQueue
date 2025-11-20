@@ -1144,3 +1144,118 @@ html {
     display: none;
   }
 }
+
+
+/* =====================================================
+   📱 MOBILE RESPONSIVE ENHANCEMENTS (HOME PAGE)
+   ===================================================== */
+@media (max-width: 768px) {
+  /* Reduce container size */
+  .container {
+    padding: 0 18px !important;
+  }
+
+  /* Navbar fixes */
+  .nav-container {
+    height: 72px !important;
+  }
+
+  /* Hero spacing */
+  .hero-section {
+    padding: 90px 0 60px !important;
+  }
+
+  /* Button full width for touch screens */
+  .btn-primary,
+  .btn-outline {
+    width: 100% !important;
+    justify-content: center !important;
+  }
+
+  /* Cards compact spacing */
+  .service-card,
+  .doctor-card,
+  .contact-form-wrapper {
+    padding: 26px !important;
+  }
+
+  /* Footer alignment */
+  .footer-brand,
+  .footer-content,
+  .footer-links {
+    text-align: center !important;
+    justify-content: center !important;
+  }
+}
+
+/* =====================================================
+   📱 SMALL PHONES (<480px)
+   ===================================================== */
+@media (max-width: 480px) {
+  .hero-title {
+    font-size: 1.85rem !important;
+  }
+
+  .hero-subtitle {
+    font-size: 1rem !important;
+  }
+
+  .section-title {
+    font-size: 1.65rem !important;
+  }
+
+  /* Reduce card radius */
+  .service-card,
+  .doctor-card,
+  .contact-form-wrapper {
+    border-radius: 12px !important;
+    padding: 20px !important;
+  }
+}
+
+/* =====================================================
+   📌 PWA APP MODE (when added to Home Screen)
+   ===================================================== */
+@media all and (display-mode: standalone) {
+  body {
+    background: #ffffff !important;
+  }
+
+  /* Remove browser scrolling bounce margin */
+  .home-page {
+    padding-bottom: 18px !important;
+  }
+
+  /* Force full-screen layout look */
+  .hero-section,
+  .about-section,
+  .services-section,
+  .doctors-section,
+  .contact-section {
+    padding-top: 64px !important;
+    padding-bottom: 64px !important;
+  }
+
+  /* Navbar adjustment inside installed app */
+  .home-navbar {
+    position: sticky !important;
+    top: 0 !important;
+    border-bottom: 1px solid #e2e8f0 !important;
+  }
+
+  /* Buttons full width in app mode */
+  .btn-primary,
+  .btn-outline {
+    width: 100% !important;
+    justify-content: center !important;
+  }
+
+  /* Slightly larger spacing for touchscreen */
+  .service-card,
+  .doctor-card,
+  .contact-form-wrapper {
+    margin-bottom: 18px !important;
+    box-shadow: none !important;
+  }
+}
+

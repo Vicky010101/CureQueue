@@ -1,3 +1,4 @@
+/* 🌍 ROOT THEME */
 :root {
   --bg: #f7f9fb;
   --fg: #0f172a;
@@ -90,8 +91,6 @@ body {
 @media (max-width: 1024px) { .grid-3, .grid-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 640px) { .grid-2, .grid-3 { grid-template-columns: 1fr; } }
 
-
-
 /* Typography helpers */
 .page-title { font-size: 24px; font-weight: 600; margin: 0; }
 .page-subtitle { color: var(--muted); margin-top: 4px; font-size: 14px; }
@@ -142,8 +141,42 @@ body {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
 }
+.animate-spin { animation: spin 1s linear infinite; }
 
-.animate-spin {
-  animation: spin 1s linear infinite;
+/*  📱 MOBILE RESPONSIVE UI */
+@media (max-width: 768px) {
+  .navbar-inner { padding: 0 12px; }
+  .navbar-actions .btn { padding: 6px 8px; font-size: 13px; }
+  .sidebar nav { padding: 12px; }
+
+  .card { padding: 14px; }
+  .page-title { font-size: 20px; }
+  .page-subtitle { font-size: 13px; }
+
+  .footer-inner { justify-content: center; text-align: center; }
 }
 
+/* 📱 SMALL MOBILE UI */
+@media (max-width: 480px) {
+  .navbar-inner { height: 56px; }
+  .brand { font-size: 15px; }
+
+  .btn { padding: 7px 10px; font-size: 13px; }
+  .card-title { font-size: 16px; }
+
+  .sidebar-link { padding: 10px; font-size: 15px; }
+  .list-item { flex-direction: column; gap: 6px; align-items: flex-start; }
+}
+
+/* 📱📌 MOBILE APP MODE (PWA: ADD TO HOME SCREEN) */
+@media all and (display-mode: standalone) {
+  .navbar { border-bottom: none; }
+  .footer { display: none; } /* Full immersive app */
+  body { background: #ffffff; }
+
+  .page-main { padding-bottom: 24px; }
+  .sidebar { box-shadow: none; }
+  .sidebar.open { transform: translateX(0); }
+
+  .card { border-radius: 0; padding: 20px; box-shadow: none; }
+}

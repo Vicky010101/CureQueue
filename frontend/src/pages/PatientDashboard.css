@@ -1359,4 +1359,28 @@
   .appointment-section .patient-card .patient-card-body .card[style] {
     padding: 1rem !important;
   }
+
+  /* Home Visit Form - Mobile Layout */
+  .home-visit-form-container {
+    padding: 12px;
+  }
+
+  .appointment-section {
+    padding: 0;
+  }
+
+  .form-modern .grid.grid-2 {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .form-modern .form-field {
+    width: 100%;
+  }
+
+  .patient-card {
+    width: 100%;
+    margin: 0;
+  }
 }

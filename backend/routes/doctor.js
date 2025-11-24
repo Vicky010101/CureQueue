@@ -38,7 +38,7 @@ router.get("/appointments", auth, roleCheck("doctor", "admin"), async (req, res)
 router.get("/ratings", async (req, res) => {
     try {
         // Get all doctors
-        const doctors = await User.find({ role: "doctor" }).select("_id name email");
+        const doctors = await User.find({ role: "doctor" }).select("_id name email homeVisitFee");
 
         // Aggregate ratings for each doctor
         const ratingsAgg = await Review.aggregate([
@@ -69,13 +69,48 @@ router.get("/ratings", async (req, res) => {
             name: doctor.name,
             email: doctor.email,
             averageRating: ratingsMap[doctor._id.toString()]?.averageRating || null,
-            totalReviews: ratingsMap[doctor._id.toString()]?.totalReviews || 0
+            totalReviews: ratingsMap[doctor._id.toString()]?.totalReviews || 0,
+            homeVisitFee: doctor.homeVisitFee || null
         }));
 
         res.json({ doctors: doctorsWithRatings });
     } catch (e) {
         console.error('Get doctor ratings error:', e);
         res.status(500).json({ msg: "Server error while fetching doctor ratings" });
+    }
+});
+
+// PATCH /api/doctor/home-visit-fee - Update logged-in doctor's home visit fee
+router.patch("/home-visit-fee", auth, roleCheck("doctor"), async (req, res) => {
+    try {
+        const { homeVisitFee } = req.body;
+        
+        // Validate that homeVisitFee is a number if provided
+        if (homeVisitFee !== undefined && homeVisitFee !== null) {
+            const fee = Number(homeVisitFee);
+            if (isNaN(fee) || fee < 0) {
+                return res.status(400).json({ msg: "Home visit fee must be a non-negative number" });
+            }
+        }
+        
+        // Update the doctor's home visit fee
+        const updatedDoctor = await User.findByIdAndUpdate(
+            req.user.id,
+            { homeVisitFee: homeVisitFee !== undefined && homeVisitFee !== null ? Number(homeVisitFee) : null },
+            { new: true, runValidators: true }
+        ).select("-password");
+        
+        if (!updatedDoctor) {
+            return res.status(404).json({ msg: "Doctor not found" });
+        }
+        
+        res.json({ 
+            success: true, 
+            homeVisitFee: updatedDoctor.homeVisitFee 
+        });
+    } catch (e) {
+        console.error('Update home visit fee error:', e);
+        res.status(500).json({ msg: "Server error" });
     }
 });
 

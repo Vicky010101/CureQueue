@@ -197,3 +197,36 @@ img, video, canvas, iframe {
 
   .card { border-radius: 0; padding: 20px; box-shadow: none; }
 }
+
+/* ---------- Mobile-app style for OPTION UI ---------- */
+option {
+  padding: 12px 14px;
+  font-size: 15px;
+  font-weight: 500;
+  border-radius: 6px;
+  background-color: #ffffff;
+  color: #333;
+}
+
+/* Highlight selection and tap feedback */
+option:checked,
+option:focus {
+  background-color: #e7f3ff !important;
+  color: #007bff !important;
+  font-weight: 600;
+}
+
+/* Subtle hover effect (mobile browsers support) */
+option:hover {
+  background-color: #f1f7ff;
+  color: #005fcc;
+}
+
+/* 📱 MOBILE-ONLY OVERRIDE (no change on desktop) */
+@media (max-width: 768px) {
+  option {
+    padding: 16px 18px;
+    font-size: 16px;
+    border-radius: 8px;
+  }
+}

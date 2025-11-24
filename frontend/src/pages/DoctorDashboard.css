@@ -1367,11 +1367,13 @@
    ========================================================== */
 @media (max-width: 768px) {
   .doctor-dashboard-container {
-    padding: 14px !important;
+    padding: 12px !important;
   }
 
   .doctor-card,
   .doctor-add-form {
+    width: 100% !important;
+    margin: 0 0 16px 0 !important;
     padding: 18px !important;
     border-radius: 12px !important;
   }
@@ -1379,11 +1381,38 @@
   .doctor-toolbar {
     flex-direction: column !important;
     align-items: stretch !important;
-    gap: 12px !important;
+    gap: 8px !important;
+  }
+
+  .doctor-search-group {
+    width: 100% !important;
   }
 
   .doctor-search-input {
     width: 100% !important;
+  }
+
+  .doctor-filter-group {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 6px !important;
+    justify-content: flex-start !important;
+  }
+
+  /* Make table horizontally scrollable */
+  .doctor-table,
+  .table-modern {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    display: block !important;
+  }
+
+  .doctor-table .table-row,
+  .doctor-table .table-header,
+  .table-modern .table-row,
+  .table-modern .table-header {
+    min-width: 600px !important;
+    display: grid !important;
   }
 
   /* Full width buttons for touchscreen */
@@ -1394,21 +1423,28 @@
     justify-content: center !important;
   }
 
-  /* Compact table view */
+  /* Appointment list items stack vertically */
+  .doctor-appointment-list .list-item {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 12px !important;
+  }
+
+  /* Queue items */
+  .doctor-queue-item {
+    justify-content: space-between !important;
+    gap: 8px !important;
+    flex-direction: row !important;
+  }
+
+  /* Compact table view - keep for smaller screens */
   .doctor-table-header,
   .doctor-table-row {
-    grid-template-columns: 1fr 1fr !important;
     font-size: 0.8rem !important;
   }
 
-  /* Hide extra columns */
-  .doctor-table-cell:nth-child(n+3) {
-    display: none !important;
-  }
-
   /* Appointment and queue items stack */
-  .doctor-appointment-item,
-  .doctor-queue-item {
+  .doctor-appointment-item {
     flex-direction: column !important;
     align-items: stretch !important;
     gap: 14px !important;

@@ -18,7 +18,8 @@ function useDoctors() {
           name: d.name, 
           specialty: d.email,
           averageRating: d.averageRating,
-          totalReviews: d.totalReviews
+          totalReviews: d.totalReviews,
+          homeVisitFee: d.homeVisitFee
         })));
       } catch (_) {}
     })();
@@ -247,6 +248,25 @@ function HomeVisitRequest() {
 								</select>
 							</div>
 						</div>
+
+						{/* Home Visit Fee Display */}
+						{selectedDoctor && selectedDoctor.homeVisitFee !== null && selectedDoctor.homeVisitFee !== undefined && !isNaN(Number(selectedDoctor.homeVisitFee)) && (
+							<div className="form-field">
+								<div style={{ 
+									backgroundColor: '#f0f9ff', 
+									border: '1px solid #0ea5e9', 
+									borderRadius: '8px', 
+									padding: '12px 16px',
+									display: 'flex',
+									alignItems: 'center',
+									gap: '8px'
+								}}>
+									<strong style={{ color: '#0c4a6e', fontSize: '14px' }}>
+										Home Visit Fee: ₹{Number(selectedDoctor.homeVisitFee).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+									</strong>
+								</div>
+							</div>
+						)}
 						
 						<div className="form-field">
 							<label className="label">Address *</label>
@@ -319,4 +339,3 @@ export default HomeVisitRequest;
 
 
 
-s

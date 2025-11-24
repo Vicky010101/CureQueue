@@ -2,7 +2,7 @@ import React, { useEffect, useState, useMemo } from "react";
 import API from "../api";
 import { motion } from "framer-motion";
 import './DoctorDashboard.css';
-import { ClipboardList, CalendarDays, X, User, Clock, FileText, CheckCircle, History, AlertCircle, Pencil, XCircle, Search, UserPlus, Phone, Home } from "lucide-react";
+import { ClipboardList, CalendarDays, X, User, Clock, FileText, CheckCircle, History, AlertCircle, Pencil, XCircle, Search, UserPlus, Phone, Home, Settings, Save } from "lucide-react";
 import { toast } from "sonner";
 import { queueBus } from "../lib/eventBus";
 import HomeVisitRequests from "../components/HomeVisitRequests";
@@ -28,6 +28,10 @@ function DoctorDashboard() {
 		age: '',
 		gender: ''
 	});
+	// Settings state
+	const [showSettings, setShowSettings] = useState(false);
+	const [homeVisitFee, setHomeVisitFee] = useState('');
+	const [savingFee, setSavingFee] = useState(false);
 
 	// Load all doctor's appointments function
 	const loadAllAppointments = async () => {
@@ -84,6 +88,7 @@ function DoctorDashboard() {
 				const meRes = await API.get("/auth/me");
 				if (!isMounted) return;
 				setMe(meRes.data.user);
+				setHomeVisitFee(meRes.data.user.homeVisitFee || '');
 				await loadAllAppointments();
 			} catch (e) {
 				toast.error('Failed to load doctor data');
@@ -492,6 +497,22 @@ function DoctorDashboard() {
 		}
 	};
 
+	// Save home visit fee
+	const saveHomeVisitFee = async () => {
+		setSavingFee(true);
+		try {
+			const feeValue = homeVisitFee === '' ? null : Number(homeVisitFee);
+			const res = await API.patch('/doctor/home-visit-fee', { homeVisitFee: feeValue });
+			setMe(prev => ({ ...prev, homeVisitFee: res.data.homeVisitFee }));
+			toast.success('Home visit fee updated successfully');
+		} catch (e) {
+			console.error('Save fee error:', e);
+			toast.error(e.response?.data?.msg || 'Failed to update home visit fee');
+		} finally {
+			setSavingFee(false);
+		}
+	};
+
 	// Status badge helper
 	const statusBadgeClass = (status) => {
 		if (status === 'completed') return 'badge badge-green';
@@ -810,6 +831,68 @@ function DoctorDashboard() {
 					<HomeVisitRequests doctorId={me._id} />
 				</motion.div>
 			)}
+
+			{/* Settings Section */}
+			<motion.div layout className="card doctor-card">
+				<div className="card-header doctor-card-header">
+					<div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+						<h2 className="card-title doctor-card-title">Settings</h2>
+						<Settings size={20} color="#007bff" />
+					</div>
+					<button 
+						className="btn btn-outline doctor-btn doctor-btn-outline" 
+						onClick={() => setShowSettings(!showSettings)}
+					>
+						{showSettings ? 'Hide' : 'Show'} Settings
+					</button>
+				</div>
+
+				{showSettings && (
+					<motion.div
+						initial={{ opacity: 0, height: 0 }}
+						animate={{ opacity: 1, height: 'auto' }}
+						exit={{ opacity: 0, height: 0 }}
+						className="doctor-settings-content"
+						style={{ padding: '24px' }}
+					>
+						<div className="form-field doctor-form-field" style={{ marginBottom: '16px' }}>
+							<label className="label doctor-form-label">Home Visit Fee (₹)</label>
+							<div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+								<input
+									className="input doctor-form-input"
+									type="number"
+									min="0"
+									step="0.01"
+									value={homeVisitFee}
+									onChange={(e) => setHomeVisitFee(e.target.value)}
+									placeholder="Enter home visit fee"
+									style={{ flex: 1 }}
+								/>
+								<button
+									className="btn btn-primary doctor-btn doctor-btn-primary"
+									onClick={saveHomeVisitFee}
+									disabled={savingFee}
+								>
+									{savingFee ? (
+										<>
+											<div className="spinner" style={{ width: 16, height: 16, borderWidth: 2 }}></div>
+											Saving...
+										</>
+									) : (
+										<>
+											<Save size={16} />
+											Save
+										</>
+									)}
+								</button>
+							</div>
+							<p className="text-muted" style={{ fontSize: '12px', marginTop: '8px', marginBottom: 0 }}>
+								This fee will be displayed to patients when they select you for a home visit.
+							</p>
+						</div>
+					</motion.div>
+				)}
+			</motion.div>
 
 		</div>
 	);

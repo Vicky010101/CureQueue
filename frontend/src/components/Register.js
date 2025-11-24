@@ -2,8 +2,9 @@ import React, { useState } from "react";
 import API from "../api";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { UserPlus, Heart, Home } from "lucide-react";
+import { UserPlus, Home } from "lucide-react";
 import "../auth-pages.css";
+import logoImage from "../logo L.png";
 
 function Register() {
     const [form, setForm] = useState({ name: "", email: "", password: "", phone: "", role: "patient" });
@@ -67,9 +68,7 @@ function Register() {
             
             <motion.div className="auth-left" initial={{ opacity: 0, x: -50 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.6 }}>
                 <div className="auth-brand">
-                    <div className="auth-illustration">
-                        <Heart size={80} />
-                    </div>
+                    <img src={logoImage} alt="CureQueue Logo" className="main-left-logo" />
                     <h1>CureQueue</h1>
                     <p>Join our healthcare community</p>
                 </div>

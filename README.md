@@ -2,6 +2,10 @@
 
 A comprehensive healthcare management system with real-time queue management, appointment booking, and home visit requests.
 
+Live Demo : https://cure-queue-cyan.vercel.app/
+
+
+
 ## 🚀 Features
 
 ### ✅ Admin Dashboard
